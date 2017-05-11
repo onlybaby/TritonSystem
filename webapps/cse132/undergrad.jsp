@@ -17,7 +17,7 @@
             <%
                 try {
                     Class.forName("org.postgresql.Driver");
-                    String dbURL = "jdbc:postgresql://localhost:9999/cse132?user=postgres&password=admin";
+                    String dbURL = "jdbc:postgresql:cse132?user=postgres&password=admin";
                     Connection conn = DriverManager.getConnection(dbURL);
 
             %>
@@ -40,8 +40,7 @@
                             1, Integer.parseInt(request.getParameter("PID")));
                         pstmt.setString(2, request.getParameter("COLLEGE"));
                        pstmt.setString(3, request.getParameter("MAJOR"));
-                       pstmt.setInt(
-                           4, Integer.parseInt(request.getParameter("MINOR")));
+                       pstmt.setString(4, request.getParameter("MINOR"));
                         pstmt.setString(5, request.getParameter("MAJOR_TYPE"));
                         int rowCount = pstmt.executeUpdate();
 
@@ -107,12 +106,12 @@
             <%
                     // Create the statement
                     Statement statement = conn.createStatement();
-                    Statement statement1 = conn.createStatement();
-                    Statement statement2 = conn.createStatement();
+                    //Statement statement1 = conn.createStatement();
+                    //Statement statement2 = conn.createStatement();
                     // Use the created statement to SELECT
                     // the student attributes FROM the Student table.
                     ResultSet rs = statement.executeQuery
-                        ("SELECT * FROM Grad");
+                        ("SELECT * FROM Undergrad");
                         // ResultSet rs1 = statement1.executeQuery
                         //     ("SELECT * FROM Dept");
                         // ResultSet rs2 = statement2.executeQuery
@@ -130,7 +129,7 @@
                         <th>Action</th>
                     </tr>
                     <tr>
-                        <form action="undegrad.jsp" method="get">
+                        <form action="undergrad.jsp" method="get">
                             <input type="hidden" value="insert" name="action">
                             <th><input value="" name="PID" size="10"></th>
                             <th><select name="COLLEGE">
@@ -183,13 +182,13 @@
                                     name="MAJOR" size="20">
                             </td>
 
-                            <%-- Get the NUM_OF_COMMITTEE --%>
+                            <%-- Get the MINOR --%>
                             <td>
                                 <input value="<%= rs.getString("MINOR") %>"
                                     name="MINOR" size="20">
                             </td>
 
-                            <%-- Get the ADVISOR --%>
+                            <%-- Get the MAJOR_TYPE --%>
                             <td>
                                 <input value="<%= rs.getString("MAJOR_TYPE") %>"
                                     name="MAJOR_TYPE" size="20">

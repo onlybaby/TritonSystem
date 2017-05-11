@@ -17,7 +17,7 @@
             <%
                 try {
                     Class.forName("org.postgresql.Driver");
-                    String dbURL = "jdbc:postgresql://localhost:9999/cse132?user=postgres&password=admin";
+                    String dbURL = "jdbc:postgresql:cse132?user=postgres&password=admin";
                     Connection conn = DriverManager.getConnection(dbURL);
 
             %>
