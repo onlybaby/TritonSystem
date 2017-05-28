@@ -17,7 +17,7 @@
             <%
                 try {
                     Class.forName("org.postgresql.Driver");
-                    String dbURL = "jdbc:postgresql:cse132?user=postgres&password=admin";
+                    String dbURL = "jdbc:postgresql://localhost:9999/cse132?user=postgres&password=admin";
                     Connection conn = DriverManager.getConnection(dbURL);
 
             %>
@@ -66,8 +66,7 @@
 
                             pstmt.setString(1, request.getParameter("COLLEGE"));
                            pstmt.setString(2, request.getParameter("MAJOR"));
-                           pstmt.setInt(
-                               3, Integer.parseInt(request.getParameter("MINOR")));
+                           pstmt.setString(3, request.getParameter("MINOR"));
                             pstmt.setString(4, request.getParameter("MAJOR_TYPE"));
                             pstmt.setInt(
                                 5, Integer.parseInt(request.getParameter("PID")));
@@ -161,7 +160,7 @@
             %>
 
                     <tr>
-                        <form action="undegrad.jsp" method="get">
+                        <form action="undergrad.jsp" method="get">
                             <input type="hidden" value="update" name="action">
 
                             <%-- Get the PID, which is a number --%>
@@ -199,7 +198,7 @@
                                 <input type="submit" value="Update">
                             </td>
                         </form>
-                        <form action="undegrad.jsp" method="get">
+                        <form action="undergrad.jsp" method="get">
                             <input type="hidden" value="delete" name="action">
                             <input type="hidden"
                                 value="<%= rs.getInt("PID") %>" name="PID">

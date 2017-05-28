@@ -12,12 +12,12 @@
             <%-- Set the scripting language to Java and --%>
             <%-- Import the java.sql package --%>
             <%@ page language="java" import="java.sql.*" %>
-    
+
             <%-- -------- Open Connection Code -------- --%>
             <%
                 try {
                     Class.forName("org.postgresql.Driver");
-                    String dbURL = "jdbc:postgresql:cse132?user=postgres&password=admin";
+                    String dbURL = "jdbc:postgresql://localhost:9999/cse132?user=postgres&password=admin";
                     Connection conn = DriverManager.getConnection(dbURL);
 
             %>
@@ -30,7 +30,7 @@
 
                         // Begin transaction
                         conn.setAutoCommit(false);
-                        
+
                         // Create the prepared statement and use it to
                         // INSERT the student attributes INTO the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
@@ -55,24 +55,16 @@
 
                         // Begin transaction
                         conn.setAutoCommit(false);
-                        
+
                         // Create the prepared statement and use it to
                         // UPDATE the student attributes in the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
-                            "UPDATE COURSE SET COURSE_NAME = ?, MIN_UNIT = ?, " +
-                            "MAX_UNIT = ?, DEPT = ?, GRADE_OPTION = ?, " +
-                            "LAB_REQUIRED = ?, INSTRUCTOR_CONSENT = ?, " +
-                            "CATEGORY = ? WHERE COURSE_ID = ?");
+                            "UPDATE degree SET UNITS = ?, DEPT = ? WHERE DEGREE_NAME = ? AND DEGREE_TYPE = ?");
 
-                        pstmt.setString(1, request.getParameter("COURSE_NAME"));
-                        pstmt.setInt(2, Integer.parseInt(request.getParameter("MIN_UNIT")));
-                        pstmt.setInt(3, Integer.parseInt(request.getParameter("MAX_UNIT")));
-                        pstmt.setString(4, request.getParameter("DEPT"));
-                        pstmt.setString(5, request.getParameter("GRADE_OPTION"));
-                        pstmt.setString(6, request.getParameter("LAB_REQUIRED"));
-                        pstmt.setString(7, request.getParameter("INSTRUCTOR_CONSENT"));
-                        pstmt.setString(8, request.getParameter("CATEGORY"));
-                        pstmt.setString(9, request.getParameter("COURSE_ID"));
+                        pstmt.setInt(1, Integer.parseInt(request.getParameter("UNITS")));
+                        pstmt.setString(2, request.getParameter("DEPT"));
+                        pstmt.setString(3, request.getParameter("DEGREE_NAME"));
+                        pstmt.setString(4, request.getParameter("DEGREE_TYPE"));
                         int rowCount = pstmt.executeUpdate();
 
                         // Commit transaction
@@ -88,13 +80,14 @@
 
                         // Begin transaction
                         conn.setAutoCommit(false);
-                        
+
                         // Create the prepared statement and use it to
                         // DELETE the student FROM the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
-                            "DELETE FROM Course WHERE COURSE_ID = ?");
+                            "DELETE FROM degree WHERE DEGREE_NAME = ? AND DEGREE_TYPE = ?");
 
-                        pstmt.setString(1, request.getParameter("COURSE_ID"));
+                            pstmt.setString(1, request.getParameter("DEGREE_NAME"));
+                            pstmt.setString(2, request.getParameter("DEGREE_TYPE"));
                         int rowCount = pstmt.executeUpdate();
 
                         // Commit transaction
@@ -150,9 +143,9 @@
             <%-- -------- Iteration Code -------- --%>
             <%
                     // Iterate over the ResultSet
-        
+
                     while ( rs.next() ) {
-        
+
             %>
 
                     <tr>
@@ -161,29 +154,29 @@
 
                             <%-- Get the DEGREE_NAME --%>
                             <td>
-                                <input value="<%= rs.getString("DEGREE_NAME") %>" 
+                                <input value="<%= rs.getString("DEGREE_NAME") %>"
                                     name="DEGREE_NAME" size="10">
                             </td>
-    
+
                             <%-- Get the DEGREE_TYPE --%>
                             <td>
-                                <input value="<%= rs.getString("DEGREE_TYPE") %>" 
+                                <input value="<%= rs.getString("DEGREE_TYPE") %>"
                                     name="DEGREE_TYPE" size="10">
                             </td>
-    
+
                             <%-- Get the UNITS --%>
                             <td>
                                 <input value="<%= rs.getInt("UNITS") %>"
                                     name="UNITS" size="15">
                             </td>
-    
+
 
                             <%-- Get the DEPT --%>
                             <td>
-                                <input value="<%= rs.getString("DEPT") %>" 
+                                <input value="<%= rs.getString("DEPT") %>"
                                     name="DEPT" size="15">
                             </td>
-    
+
 
                             <%-- Button --%>
                             <td>
@@ -192,8 +185,11 @@
                         </form>
                         <form action="degree.jsp" method="get">
                             <input type="hidden" value="delete" name="action">
-                            <input type="hidden" 
-                                value="<%= rs.getString("degree_name") %>" name="degree_name">
+                            <input type="hidden"
+                                value="<%= rs.getString("DEGREE_NAME") %>" name="DEGREE_NAME">
+                            <input type="hidden"
+                                value="<%= rs.getString("DEGREE_TYPE") %>" name="DEGREE_TYPE">
+
                             <%-- Button --%>
                             <td>
                                 <input type="submit" value="Delete">
@@ -209,11 +205,11 @@
                     // Close the ResultSet
                     rs.close();
                     rs1.close();
-    
+
                     // Close the Statement
                     statement.close();
                     statement1.close();
-    
+
                     // Close the Connection
                     conn.close();
                 } catch (SQLException sqle) {

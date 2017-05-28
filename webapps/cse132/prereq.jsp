@@ -12,12 +12,12 @@
             <%-- Set the scripting language to Java and --%>
             <%-- Import the java.sql package --%>
             <%@ page language="java" import="java.sql.*" %>
-    
+
             <%-- -------- Open Connection Code -------- --%>
             <%
                 try {
                     Class.forName("org.postgresql.Driver");
-                    String dbURL = "jdbc:postgresql:cse132?user=postgres&password=admin";
+                    String dbURL = "jdbc:postgresql://localhost:9999/cse132?user=postgres&password=admin";
                     Connection conn = DriverManager.getConnection(dbURL);
 
             %>
@@ -30,8 +30,8 @@
 
                         // Begin transaction
                         conn.setAutoCommit(false);
-                        
-                        
+
+
 
                         // Create the prepared statement and use it to
                         // INSERT the student attributes INTO the Student table.
@@ -59,7 +59,7 @@
 
                         // Begin transaction
                         conn.setAutoCommit(false);
-                        
+
                         // Create the prepared statement and use it to
                         // UPDATE the student attributes in the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
@@ -82,13 +82,14 @@
 
                         // Begin transaction
                         conn.setAutoCommit(false);
-                        
+
                         // Create the prepared statement and use it to
                         // DELETE the student FROM the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
-                            "DELETE FROM prereq WHERE COURSE_ID = ?");
+                            "DELETE FROM prereq WHERE COURSE_ID = ? AND PREREQ_ID = ?");
 
                         pstmt.setString(1, request.getParameter("COURSE_ID"));
+                        pstmt.setString(2, request.getParameter("PREREQ_ID"));
                         int rowCount = pstmt.executeUpdate();
 
                         // Commit transaction
@@ -135,9 +136,9 @@
             <%-- -------- Iteration Code -------- --%>
             <%
                     // Iterate over the ResultSet
-        
+
                     while ( rs.next() ) {
-        
+
             %>
 
                     <tr>
@@ -146,17 +147,17 @@
 
                             <%-- Get the COURSE_ID --%>
                             <td>
-                                <input value="<%= rs.getString("COURSE_ID") %>" 
+                                <input value="<%= rs.getString("COURSE_ID") %>"
                                     name="COURSE_ID" size="10">
                             </td>
-    
+
                             <%-- Get the PREREQ_ID --%>
                             <td>
-                                <input value="<%= rs.getString("PREREQ_ID") %>" 
+                                <input value="<%= rs.getString("PREREQ_ID") %>"
                                     name="PREREQ_ID" size="10">
                             </td>
-    
-    
+
+
                             <%-- Button --%>
                             <td>
                                 <input type="submit" value="Update">
@@ -164,8 +165,10 @@
                         </form>
                         <form action="prereq.jsp" method="get">
                             <input type="hidden" value="delete" name="action">
-                            <input type="hidden" 
+                            <input type="hidden"
                                 value="<%= rs.getString("COURSE_ID") %>" name="COURSE_ID">
+                            <input type="hidden"
+                                value="<%= rs.getString("PREREQ_ID") %>" name="PREREQ_ID">
                             <%-- Button --%>
                             <td>
                                 <input type="submit" value="Delete">
@@ -181,7 +184,7 @@
                     // Close the ResultSet
                     rs.close();
                     rs1.close();
-    
+
                     // Close the Statement
                     statement.close();
                     statement1.close();

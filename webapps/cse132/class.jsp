@@ -12,12 +12,12 @@
             <%-- Set the scripting language to Java and --%>
             <%-- Import the java.sql package --%>
             <%@ page language="java" import="java.sql.*" %>
-    
+
             <%-- -------- Open Connection Code -------- --%>
             <%
                 try {
                     Class.forName("org.postgresql.Driver");
-                    String dbURL = "jdbc:postgresql:cse132?user=postgres&password=admin";
+                    String dbURL = "jdbc:postgresql://localhost:9999/cse132?user=postgres&password=admin";
                     Connection conn = DriverManager.getConnection(dbURL);
 
             %>
@@ -30,7 +30,7 @@
 
                         // Begin transaction
                         conn.setAutoCommit(false);
-                        
+
                         // Create the prepared statement and use it to
                         // INSERT the student attributes INTO the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
@@ -56,7 +56,7 @@
 
                         // Begin transaction
                         conn.setAutoCommit(false);
-                        
+
                         // Create the prepared statement and use it to
                         // UPDATE the student attributes in the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
@@ -84,7 +84,7 @@
 
                         // Begin transaction
                         conn.setAutoCommit(false);
-                        
+
                         // Create the prepared statement and use it to
                         // DELETE the student FROM the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
@@ -144,9 +144,9 @@
 
                     rs = statement.executeQuery
                         ("SELECT * FROM Class");
-        
+
                     while ( rs.next() ) {
-        
+
             %>
 
                     <tr>
@@ -156,24 +156,24 @@
 
                             <%-- Get the CLASS_ID --%>
                             <td>
-                                <input value="<%= rs.getInt("CLASS_ID") %>" 
+                                <input value="<%= rs.getInt("CLASS_ID") %>"
                                     name="CLASS_ID" size="10">
                             </td>
 
 
                             <%-- Get the COURSE_ID --%>
                             <td>
-                                <input value="<%= rs.getString("COURSE_ID") %>" 
+                                <input value="<%= rs.getString("COURSE_ID") %>"
                                     name="COURSE_ID" size="10">
                             </td>
-    
-    
+
+
                             <%-- Get the INSTRUCTOR --%>
                             <td>
                                 <input value="<%= rs.getString("INSTRUCTOR") %>"
                                     name="INSTRUCTOR" size="15">
                             </td>
-    
+
                             <%-- Get the ENROLLMENT_LIMIT --%>
                             <td>
                                 <input value="<%= rs.getInt("ENROLLMENT_LIMIT") %>"
@@ -182,7 +182,7 @@
 
                             <%-- Get the QUARTER --%>
                             <td>
-                                <input value="<%= rs.getString("QUARTER") %>" 
+                                <input value="<%= rs.getString("QUARTER") %>"
                                     name="QUARTER" size="15">
                             </td>
 
@@ -194,7 +194,7 @@
                         </form>
                         <form action="class.jsp" method="get">
                             <input type="hidden" value="delete" name="action">
-                            <input type="hidden" 
+                            <input type="hidden"
                                 value="<%= rs.getInt("CLASS_ID") %>" name="CLASS_ID">
                             <%-- Button --%>
                             <td>
@@ -210,10 +210,10 @@
             <%
                     // Close the ResultSet
                     rs.close();
-    
+
                     // Close the Statement
                     statement.close();
-    
+
                     // Close the Connection
                     conn.close();
                 } catch (SQLException sqle) {

@@ -17,7 +17,7 @@
             <%
                 try {
                     Class.forName("org.postgresql.Driver");
-                    String dbURL = "jdbc:postgresql:cse132?user=postgres&password=admin";
+                    String dbURL = "jdbc:postgresql://localhost:9999/cse132?user=postgres&password=admin";
                     Connection conn = DriverManager.getConnection(dbURL);
 
             %>
@@ -59,11 +59,15 @@
                         // Create the prepared statement and use it to
                         // UPDATE the student attributes in the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
-                            "UPDATE Thesis_Committee SET FACULTY = ? WHERE PID = ?");
+                            "UPDATE Thesis_Committee SET PID = ?, FACULTY = ?");
 
-                        pstmt.setString(1, request.getParameter("FACULTY"));
-                        pstmt.setInt(2, Integer.parseInt(request.getParameter("PID")));
-                        int rowCount = pstmt.executeUpdate();
+                            pstmt.setInt(
+                                1, Integer.parseInt(request.getParameter("PID")));
+                            pstmt.setString(2, request.getParameter("FACULTY"));
+                        //     pstmt.setInt(
+                        //         3, Integer.parseInt(request.getParameter("PID")));
+                        //     pstmt.setString(4, request.getParameter("FACULTY"));
+                        // int rowCount = pstmt.executeUpdate();
 
                         // Commit transaction
                         conn.commit();
@@ -82,9 +86,11 @@
                         // Create the prepared statement and use it to
                         // DELETE the student FROM the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
-                            "DELETE FROM Thesis_Committee WHERE PID = ?");
+                            "DELETE FROM Thesis_Committee WHERE PID = ? AND FACULTY = ?");
 
-                        pstmt.setInt(1, Integer.parseInt(request.getParameter("PID")));
+                            pstmt.setInt(
+                                1, Integer.parseInt(request.getParameter("PID")));
+                            pstmt.setString(2, request.getParameter("FACULTY"));
                         int rowCount = pstmt.executeUpdate();
 
                         // Commit transaction
@@ -155,6 +161,8 @@
                             <input type="hidden" value="delete" name="action">
                             <input type="hidden"
                                 value="<%= rs.getInt("PID") %>" name="PID">
+                                <input type="hidden"
+                                    value="<%= rs.getString("FACULTY") %>" name="FACULTY">
                             <%-- Button --%>
                             <td>
                                 <input type="submit" value="Delete">

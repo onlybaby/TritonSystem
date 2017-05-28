@@ -12,12 +12,12 @@
             <%-- Set the scripting language to Java and --%>
             <%-- Import the java.sql package --%>
             <%@ page language="java" import="java.sql.*" %>
-    
+
             <%-- -------- Open Connection Code -------- --%>
             <%
                 try {
                     Class.forName("org.postgresql.Driver");
-                    String dbURL = "jdbc:postgresql:cse132?user=postgres&password=admin";
+                    String dbURL = "jdbc:postgresql://localhost:9999/cse132?user=postgres&password=admin";
                     Connection conn = DriverManager.getConnection(dbURL);
 
             %>
@@ -30,7 +30,7 @@
 
                         // Begin transaction
                         conn.setAutoCommit(false);
-                        
+
                         // Create the prepared statement and use it to
                         // INSERT the student attributes INTO the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
@@ -52,7 +52,7 @@
 
                         // Begin transaction
                         conn.setAutoCommit(false);
-                        
+
                         // Create the prepared statement and use it to
                         // UPDATE the student attributes in the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
@@ -75,7 +75,7 @@
 
                         // Begin transaction
                         conn.setAutoCommit(false);
-                        
+
                         // Create the prepared statement and use it to
                         // DELETE the student FROM the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
@@ -118,9 +118,9 @@
             <%-- -------- Iteration Code -------- --%>
             <%
                     // Iterate over the ResultSet
-        
+
                     while ( rs.next() ) {
-        
+
             %>
 
                     <tr>
@@ -129,11 +129,11 @@
 
                             <%-- Get the CATE_NAME --%>
                             <td>
-                                <input value="<%= rs.getString("CATE_NAME") %>" 
+                                <input value="<%= rs.getString("CATE_NAME") %>"
                                     name="CATE_NAME" size="10">
                             </td>
-    
-    
+
+
                             <%-- Button --%>
                             <td>
                                 <input type="submit" value="Update">
@@ -141,7 +141,7 @@
                         </form>
                         <form action="category.jsp" method="get">
                             <input type="hidden" value="delete" name="action">
-                            <input type="hidden" 
+                            <input type="hidden"
                                 value="<%= rs.getString("CATE_NAME") %>" name="CATE_NAME">
                             <%-- Button --%>
                             <td>
@@ -157,10 +157,10 @@
             <%
                     // Close the ResultSet
                     rs.close();
-    
+
                     // Close the Statement
                     statement.close();
-    
+
                     // Close the Connection
                     conn.close();
                 } catch (SQLException sqle) {

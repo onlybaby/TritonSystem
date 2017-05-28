@@ -12,12 +12,12 @@
             <%-- Set the scripting language to Java and --%>
             <%-- Import the java.sql package --%>
             <%@ page language="java" import="java.sql.*" %>
-    
+
             <%-- -------- Open Connection Code -------- --%>
             <%
                 try {
                     Class.forName("org.postgresql.Driver");
-                    String dbURL = "jdbc:postgresql:cse132?user=postgres&password=admin";
+                    String dbURL = "jdbc:postgresql://localhost:9999/cse132?user=postgres&password=admin";
                     Connection conn = DriverManager.getConnection(dbURL);
 
             %>
@@ -30,7 +30,7 @@
 
                         // Begin transaction
                         conn.setAutoCommit(false);
-                        
+
                         // Create the prepared statement and use it to
                         // INSERT the student attributes INTO the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
@@ -57,7 +57,7 @@
 
                         // Begin transaction
                         conn.setAutoCommit(false);
-                        
+
                         // Create the prepared statement and use it to
                         // UPDATE the student attributes in the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
@@ -85,7 +85,7 @@
 
                         // Begin transaction
                         conn.setAutoCommit(false);
-                        
+
                         // Create the prepared statement and use it to
                         // DELETE the student FROM the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
@@ -136,9 +136,9 @@
             <%-- -------- Iteration Code -------- --%>
             <%
                     // Iterate over the ResultSet
-        
+
                     while ( rs.next() ) {
-        
+
             %>
 
                     <tr>
@@ -147,36 +147,36 @@
 
                             <%-- Get the pid --%>
                             <td>
-                                <input value="<%= rs.getInt("PID") %>" 
+                                <input value="<%= rs.getInt("PID") %>"
                                     name="PID" size="10">
                             </td>
 
 
                             <%-- Get the CASE_ID --%>
                             <td>
-                                <input value="<%= rs.getInt("CASE_ID") %>" 
+                                <input value="<%= rs.getInt("CASE_ID") %>"
                                     name="CASE_ID" size="10">
                             </td>
 
                             <%-- Get the START_QUARTER --%>
                             <td>
-                                <input value="<%= rs.getString("START_QUARTER") %>" 
+                                <input value="<%= rs.getString("START_QUARTER") %>"
                                     name="START_QUARTER" size="10">
                             </td>
 
                             <%-- Get the END_QUARTER --%>
                             <td>
-                                <input value="<%= rs.getString("END_QUARTER") %>" 
+                                <input value="<%= rs.getString("END_QUARTER") %>"
                                     name="END_QUARTER" size="10">
                             </td>
 
                             <%-- Get the REASON --%>
                             <td>
-                                <input value="<%= rs.getString("REASON") %>" 
+                                <input value="<%= rs.getString("REASON") %>"
                                     name="REASON" size="10">
                             </td>
-    
-    
+
+
                             <%-- Button --%>
                             <td>
                                 <input type="submit" value="Update">
@@ -184,7 +184,7 @@
                         </form>
                         <form action="probation.jsp" method="get">
                             <input type="hidden" value="delete" name="action">
-                            <input type="hidden" 
+                            <input type="hidden"
                                 value="<%= rs.getInt("case_id") %>" name="case_id">
                             <%-- Button --%>
                             <td>
@@ -200,10 +200,10 @@
             <%
                     // Close the ResultSet
                     rs.close();
-    
+
                     // Close the Statement
                     statement.close();
-    
+
                     // Close the Connection
                     conn.close();
                 } catch (SQLException sqle) {

@@ -12,12 +12,12 @@
             <%-- Set the scripting language to Java and --%>
             <%-- Import the java.sql package --%>
             <%@ page language="java" import="java.sql.*" %>
-    
+
             <%-- -------- Open Connection Code -------- --%>
             <%
                 try {
                     Class.forName("org.postgresql.Driver");
-                    String dbURL = "jdbc:postgresql:cse132?user=postgres&password=admin";
+                    String dbURL = "jdbc:postgresql://localhost:9999/cse132?user=postgres&password=admin";
                     Connection conn = DriverManager.getConnection(dbURL);
 
             %>
@@ -30,7 +30,7 @@
 
                         // Begin transaction
                         conn.setAutoCommit(false);
-                        
+
                         // Create the prepared statement and use it to
                         // INSERT the student attributes INTO the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
@@ -55,7 +55,15 @@
 
                         // Begin transaction
                         conn.setAutoCommit(false);
+                        PreparedStatement pstmt = conn.prepareStatement(
+                            "UPDATE concentration_degree SET  MIN_UNIT= ? WHERE con_name = ? AND DEPT = ? AND DEGREE_TYPE = ?");
 
+
+                            pstmt.setInt(1, Integer.parseInt(request.getParameter("MIN_UNIT")));
+                            pstmt.setString(2, request.getParameter("con_name"));
+                            pstmt.setString(3, request.getParameter("DEPT"));
+                            pstmt.setString(4, request.getParameter("DEGREE_TYPE"));
+                        int rowCount = pstmt.executeUpdate();
                         // Commit transaction
                         conn.commit();
                         conn.setAutoCommit(true);
@@ -69,7 +77,13 @@
 
                         // Begin transaction
                         conn.setAutoCommit(false);
+                        PreparedStatement pstmt = conn.prepareStatement(
+                            "DELETE FROM concentration_degree WHERE con_name = ? AND DEPT = ? AND DEGREE_TYPE");
 
+                            pstmt.setString(1, request.getParameter("con_name"));
+                            pstmt.setString(2, request.getParameter("DEPT"));
+                            pstmt.setString(3, request.getParameter("DEGREE_TYPE"));
+                        int rowCount = pstmt.executeUpdate();
                         // Commit transaction
                          conn.commit();
                         conn.setAutoCommit(true);
@@ -130,9 +144,9 @@
             <%-- -------- Iteration Code -------- --%>
             <%
                     // Iterate over the ResultSet
-        
+
                     while ( rs.next() ) {
-        
+
             %>
 
                     <tr>
@@ -141,29 +155,29 @@
 
                             <%-- Get the con_name --%>
                             <td>
-                                <input value="<%= rs.getString("con_name") %>" 
+                                <input value="<%= rs.getString("con_name") %>"
                                     name="con_name" size="10">
                             </td>
-    
+
                             <%-- Get the MIN_UNIT --%>
                             <td>
-                                <input value="<%= rs.getInt("MIN_UNIT") %>" 
+                                <input value="<%= rs.getInt("MIN_UNIT") %>"
                                     name="MIN_UNIT" size="10">
                             </td>
-    
-    
+
+
                             <%-- Get the DEPT --%>
                             <td>
-                                <input value="<%= rs.getString("DEPT") %>" 
+                                <input value="<%= rs.getString("DEPT") %>"
                                     name="DEPT" size="15">
                             </td>
-    
+
 			                <%-- Get the DEGREE_TYPE --%>
                             <td>
-                                <input value="<%= rs.getString("DEGREE_TYPE") %>" 
+                                <input value="<%= rs.getString("DEGREE_TYPE") %>"
                                     name="DEGREE_TYPE" size="15">
                             </td>
-    
+
                             <%-- Button --%>
                             <td>
                                 <input type="submit" value="Update">
@@ -171,8 +185,12 @@
                         </form>
                         <form action="condegree.jsp" method="get">
                             <input type="hidden" value="delete" name="action">
-                            <input type="hidden" 
+                            <input type="hidden"
                                 value="<%= rs.getString("con_name") %>" name="con_name">
+                            <input type="hidden"
+                                value="<%= rs.getString("DEPT") %>" name="DEPT">
+                            <input type="hidden"
+                                value="<%= rs.getString("DEGREE_TYPE") %>" name="DEGREE_TYPE">
                             <%-- Button --%>
                             <td>
                                 <input type="submit" value="Delete">
@@ -187,10 +205,10 @@
             <%
                     // Close the ResultSet
                     rs.close();
-    
+
                     // Close the Statement
                     statement.close();
-    
+
                     // Close the Connection
                     conn.close();
                 } catch (SQLException sqle) {

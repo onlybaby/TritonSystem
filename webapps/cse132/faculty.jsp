@@ -12,12 +12,12 @@
             <%-- Set the scripting language to Java and --%>
             <%-- Import the java.sql package --%>
             <%@ page language="java" import="java.sql.*" %>
-    
+
             <%-- -------- Open Connection Code -------- --%>
             <%
                 try {
                     Class.forName("org.postgresql.Driver");
-                    String dbURL = "jdbc:postgresql:cse132?user=postgres&password=admin";
+                    String dbURL = "jdbc:postgresql://localhost:9999/cse132?user=postgres&password=admin";
                     Connection conn = DriverManager.getConnection(dbURL);
 
             %>
@@ -30,16 +30,15 @@
 
                         // Begin transaction
                         conn.setAutoCommit(false);
-                        
+
                         // Create the prepared statement and use it to
                         // INSERT the student attributes INTO the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
-                            "INSERT INTO faculty VALUES (?, ?, ?)");
+                            "INSERT INTO Faculty VALUES (?, ?, ?)");
 
-                        pstmt.setString(1, request.getParameter("faculty_name"));
-                        pstmt.setString(2, request.getParameter("title"));
-                        pstmt.setString(3, request.getParameter("dept"));
-
+                        pstmt.setString(1, request.getParameter("FACULTY_NAME"));
+                        pstmt.setString(2, request.getParameter("TITLE"));
+                        pstmt.setString(3, request.getParameter("DEPT"));
                         int rowCount = pstmt.executeUpdate();
 
                         // Commit transaction
@@ -55,20 +54,18 @@
 
                         // Begin transaction
                         conn.setAutoCommit(false);
-                        
+
                         // Create the prepared statement and use it to
                         // UPDATE the student attributes in the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
-                            "UPDATE faculty SET title = ?, dept = ? WHERE faculty_name = ?");
+                            "UPDATE Faculty SET TITLE = ?, DEPT = ? WHERE FACULTY_NAME = ?");
 
-
-                        pstmt.setString(1, request.getParameter("title"));
-                        pstmt.setString(2, request.getParameter("dept"));
-                        pstmt.setString(3, request.getParameter("faculty_name"));
+                        pstmt.setString(1, request.getParameter("TITLE"));
+                        pstmt.setString(2, request.getParameter("DEPT"));
+                        pstmt.setString(3, request.getParameter("FACULTY_NAME"));
                         int rowCount = pstmt.executeUpdate();
-
                         // Commit transaction
-                        conn.commit();
+                         conn.commit();
                         conn.setAutoCommit(true);
                     }
             %>
@@ -80,13 +77,13 @@
 
                         // Begin transaction
                         conn.setAutoCommit(false);
-                        
+
                         // Create the prepared statement and use it to
                         // DELETE the student FROM the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
-                            "DELETE FROM faculty WHERE faculty_name = ?");
+                            "DELETE FROM Faculty WHERE FACULTY_NAME = ?");
 
-                        pstmt.setString(1, request.getParameter("faculty_name"));
+                        pstmt.setString(1, request.getParameter("FACULTY_NAME"));
                         int rowCount = pstmt.executeUpdate();
 
                         // Commit transaction
@@ -99,34 +96,26 @@
             <%
                     // Create the statement
                     Statement statement = conn.createStatement();
-                    Statement statement1 = conn.createStatement();
 
                     // Use the created statement to SELECT
                     // the student attributes FROM the Student table.
                     ResultSet rs = statement.executeQuery
-                        ("SELECT * FROM faculty");
-                    ResultSet rs1 = statement1.executeQuery
-                        ("SELECT * FROM dept");
+                        ("SELECT * FROM Faculty");
             %>
 
             <!-- Add an HTML table header row to format the results -->
                 <table border="1">
                     <tr>
-                        <th>faculty_name</th>
-                        <th>title</th>
-                        <th>dept</th>
-                        <th>Action</th>
+                        <th>FACULTY_NAME</th>
+                        <th>TITLE</th>
+                        <th>DEPT</th>
                     </tr>
                     <tr>
                         <form action="faculty.jsp" method="get">
                             <input type="hidden" value="insert" name="action">
-                            <th><input value="" name="faculty_name" size="10"></th>
-                            <th><input value="" name="title" size="10"></th>
-                            <th><select name="dept">
-                                <%  while(rs1.next()){ %>
-                                <option><%= rs1.getString(1)%></option>
-                                <% } %>
-                            </select></th>
+                            <th><input value="" name="FACULTY_NAME" size="50"></th>
+                            <th><input value="" name="TITLE" size="50"></th>
+                            <th><input value="" name="DEPT" size="20"></th>
                             <th><input type="submit" value="Insert"></th>
                         </form>
                     </tr>
@@ -134,35 +123,33 @@
             <%-- -------- Iteration Code -------- --%>
             <%
                     // Iterate over the ResultSet
-        
+
                     while ( rs.next() ) {
-        
+
             %>
 
                     <tr>
                         <form action="faculty.jsp" method="get">
                             <input type="hidden" value="update" name="action">
 
-                            <%-- Get the faculty_name --%>
+                            <%-- Get the FACULTY_NAME, which is a String --%>
                             <td>
-                                <input value="<%= rs.getString("faculty_name") %>" 
-                                    name="faculty_name" size="10">
+                                <input value="<%= rs.getString("FACULTY_NAME") %>"
+                                    name="FACULTY_NAME" size="50">
                             </td>
 
-
-                            <%-- Get the title --%>
+                            <%-- Get the TITLE --%>
                             <td>
-                                <input value="<%= rs.getString("title") %>" 
-                                    name="title" size="10">
+                                <input value="<%= rs.getString("TITLE") %>"
+                                    name="TITLE" size="50">
                             </td>
 
-                            <%-- Get the dept --%>
+                            <%-- Get the DEPT --%>
                             <td>
-                                <input value="<%= rs.getString("dept") %>" 
-                                    name="dept" size="10">
+                                <input value="<%= rs.getString("DEPT") %>"
+                                    name="DEPT" size="20">
                             </td>
-    
-    
+
                             <%-- Button --%>
                             <td>
                                 <input type="submit" value="Update">
@@ -170,8 +157,8 @@
                         </form>
                         <form action="faculty.jsp" method="get">
                             <input type="hidden" value="delete" name="action">
-                            <input type="hidden" 
-                                value="<%= rs.getString("faculty_name") %>" name="faculty_name">
+                            <input type="hidden"
+                                value="<%= rs.getString("FACULTY_NAME") %>" name="FACULTY_NAME">
                             <%-- Button --%>
                             <td>
                                 <input type="submit" value="Delete">
@@ -186,12 +173,10 @@
             <%
                     // Close the ResultSet
                     rs.close();
-                    rs1.close();
-    
+
                     // Close the Statement
                     statement.close();
-                    statement1.close();
-    
+
                     // Close the Connection
                     conn.close();
                 } catch (SQLException sqle) {

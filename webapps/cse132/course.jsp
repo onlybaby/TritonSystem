@@ -12,12 +12,12 @@
             <%-- Set the scripting language to Java and --%>
             <%-- Import the java.sql package --%>
             <%@ page language="java" import="java.sql.*" %>
-    
+
             <%-- -------- Open Connection Code -------- --%>
             <%
                 try {
                     Class.forName("org.postgresql.Driver");
-                    String dbURL = "jdbc:postgresql:cse132?user=postgres&password=admin";
+                    String dbURL = "jdbc:postgresql://localhost:9999/cse132?user=postgres&password=admin";
                     Connection conn = DriverManager.getConnection(dbURL);
 
             %>
@@ -30,7 +30,7 @@
 
                         // Begin transaction
                         conn.setAutoCommit(false);
-                        
+
                         // Create the prepared statement and use it to
                         // INSERT the student attributes INTO the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
@@ -60,7 +60,7 @@
 
                         // Begin transaction
                         conn.setAutoCommit(false);
-                        
+
                         // Create the prepared statement and use it to
                         // UPDATE the student attributes in the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
@@ -93,7 +93,7 @@
 
                         // Begin transaction
                         conn.setAutoCommit(false);
-                        
+
                         // Create the prepared statement and use it to
                         // DELETE the student FROM the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
@@ -176,9 +176,9 @@
             <%-- -------- Iteration Code -------- --%>
             <%
                     // Iterate over the ResultSet
-        
+
                     while ( rs.next() ) {
-        
+
             %>
 
                     <tr>
@@ -187,22 +187,22 @@
 
                             <%-- Get the COURSE_ID --%>
                             <td>
-                                <input value="<%= rs.getString("COURSE_ID") %>" 
+                                <input value="<%= rs.getString("COURSE_ID") %>"
                                     name="COURSE_ID" size="10">
                             </td>
-    
+
                             <%-- Get the COURSE_NAME --%>
                             <td>
-                                <input value="<%= rs.getString("COURSE_NAME") %>" 
+                                <input value="<%= rs.getString("COURSE_NAME") %>"
                                     name="COURSE_NAME" size="10">
                             </td>
-    
+
                             <%-- Get the MIN_UNIT --%>
                             <td>
                                 <input value="<%= rs.getInt("MIN_UNIT") %>"
                                     name="MIN_UNIT" size="15">
                             </td>
-    
+
                             <%-- Get the MAX_UNIT --%>
                             <td>
                                 <input value="<%= rs.getInt("MAX_UNIT") %>"
@@ -211,31 +211,31 @@
 
                             <%-- Get the DEPT --%>
                             <td>
-                                <input value="<%= rs.getString("DEPT") %>" 
+                                <input value="<%= rs.getString("DEPT") %>"
                                     name="DEPT" size="15">
                             </td>
-    
+
 			                <%-- Get the GRADE_OPTION --%>
                             <td>
-                                <input value="<%= rs.getString("GRADE_OPTION") %>" 
+                                <input value="<%= rs.getString("GRADE_OPTION") %>"
                                     name="GRADE_OPTION" size="15">
                             </td>
 
                             <%-- Get the LAB_REQUIRED --%>
                             <td>
-                                <input value="<%= rs.getString("LAB_REQUIRED") %>" 
+                                <input value="<%= rs.getString("LAB_REQUIRED") %>"
                                     name="LAB_REQUIRED" size="15">
                             </td>
 
                             <%-- Get the INSTRUCTOR_CONSENT --%>
                             <td>
-                                <input value="<%= rs.getString("INSTRUCTOR_CONSENT") %>" 
+                                <input value="<%= rs.getString("INSTRUCTOR_CONSENT") %>"
                                     name="INSTRUCTOR_CONSENT" size="15">
                             </td>
-    
+
                             <%-- Get the CATEGORY --%>
                             <td>
-                                <input value="<%= rs.getString("CATEGORY") %>" 
+                                <input value="<%= rs.getString("CATEGORY") %>"
                                     name="CATEGORY" size="15">
                             </td>
 
@@ -246,7 +246,7 @@
                         </form>
                         <form action="course.jsp" method="get">
                             <input type="hidden" value="delete" name="action">
-                            <input type="hidden" 
+                            <input type="hidden"
                                 value="<%= rs.getString("COURSE_ID") %>" name="COURSE_ID">
                             <%-- Button --%>
                             <td>
@@ -264,12 +264,12 @@
                     rs.close();
                     rs1.close();
                     rs2.close();
-    
+
                     // Close the Statement
                     statement.close();
                     statement1.close();
                     statement2.close();
-    
+
                     // Close the Connection
                     conn.close();
                 } catch (SQLException sqle) {
