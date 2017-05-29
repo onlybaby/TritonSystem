@@ -34,13 +34,15 @@
                         // Create the prepared statement and use it to
                         // INSERT the student attributes INTO the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
-                            "INSERT INTO probation VALUES (?, ?, ?, ?, ?)");
+                            "INSERT INTO probation VALUES (?, ?, ?, ?, ?, ?, ?)");
 
                         pstmt.setInt(1, Integer.parseInt(request.getParameter("PID")));
                         pstmt.setInt(2, Integer.parseInt(request.getParameter("CASE_ID")));
                         pstmt.setString(3, request.getParameter("START_QUARTER"));
-                        pstmt.setString(4, request.getParameter("END_QUARTER"));
-                        pstmt.setString(5, request.getParameter("REASON"));
+                        pstmt.setInt(4, Integer.parseInt(request.getParameter("START_YEAR")));
+                        pstmt.setString(5, request.getParameter("END_QUARTER"));
+                        pstmt.setInt(6, Integer.parseInt(request.getParameter("END_YEAR")));
+                        pstmt.setString(7, request.getParameter("REASON"));
 
                         int rowCount = pstmt.executeUpdate();
 
@@ -61,14 +63,16 @@
                         // Create the prepared statement and use it to
                         // UPDATE the student attributes in the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
-                            "UPDATE probation SET PID = ?, START_QUARTER = ?, END_QUARTER = ?, REASON = ? WHERE CASE_ID = ?");
+                            "UPDATE probation SET PID = ?, START_QUARTER = ?, START_YEAR = ?, END_QUARTER = ?, END_YEAR = ?, EASON = ? WHERE CASE_ID = ?");
 
 
                         pstmt.setInt(1, Integer.parseInt(request.getParameter("PID")));
                         pstmt.setString(2, request.getParameter("START_QUARTER"));
-                        pstmt.setString(3, request.getParameter("END_QUARTER"));
-                        pstmt.setString(4, request.getParameter("REASON"));
-                        pstmt.setInt(5, Integer.parseInt(request.getParameter("CASE_ID")));
+                        pstmt.setInt(3, Integer.parseInt(request.getParameter("START_YEAR")));
+                        pstmt.setString(4, request.getParameter("END_QUARTER"));
+                        pstmt.setInt(5, Integer.parseInt(request.getParameter("END_YEAR")));
+                        pstmt.setString(6, request.getParameter("REASON"));
+                        pstmt.setInt(7, Integer.parseInt(request.getParameter("CASE_ID")));
 
                         int rowCount = pstmt.executeUpdate();
 
@@ -117,7 +121,9 @@
                         <th>pid</th>
                         <th>case_id</th>
                         <th>start_quarter</th>
+                        <th>start_year</th>
                         <th>end_quarter</th>
+                        <th>end_year</th>
                         <th>reason</th>
                         <th>Action</th>
                     </tr>
@@ -126,8 +132,20 @@
                             <input type="hidden" value="insert" name="action">
                             <th><input value="" name="PID" size="10"></th>
                             <th><input value="" name="CASE_ID" size="10"></th>
-                            <th><input value="" name="START_QUARTER" size="10"></th>
-                            <th><input value="" name="END_QUARTER" size="10"></th>
+                            <th><select name="START_QUARTER">
+                                <option value="SPRING">SPRING</option>
+                                <option value="SUMMER">SUMMER</option>
+                                <option value="FALL">FALL</option>
+                                <option value="WINTER">WINTER</option>
+                            </select></th>
+                            <th><input value="" name="START_YEAR" size="10"></th>
+                            <th><select name="END_QUARTER">
+                                <option value="SPRING">SPRING</option>
+                                <option value="SUMMER">SUMMER</option>
+                                <option value="FALL">FALL</option>
+                                <option value="WINTER">WINTER</option>
+                            </select></th>
+                            <th><input value="" name="END_YEAR" size="10"></th>
                             <th><input value="" name="REASON" size="10"></th>
                             <th><input type="submit" value="Insert"></th>
                         </form>
@@ -164,10 +182,22 @@
                                     name="START_QUARTER" size="10">
                             </td>
 
+                            <%-- Get the START_YEAR --%>
+                            <td>
+                                <input value="<%= rs.getInt("START_YEAR") %>"
+                                    name="START_YEAR" size="10">
+                            </td>
+
                             <%-- Get the END_QUARTER --%>
                             <td>
                                 <input value="<%= rs.getString("END_QUARTER") %>"
                                     name="END_QUARTER" size="10">
+                            </td>
+
+                            <%-- Get the END_YEAR --%>
+                            <td>
+                                <input value="<%= rs.getInt("END_YEAR") %>"
+                                    name="END_YEAR" size="10">
                             </td>
 
                             <%-- Get the REASON --%>

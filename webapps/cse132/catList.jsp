@@ -36,10 +36,10 @@
                         // Create the prepared statement and use it to
                         // INSERT the student attributes INTO the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
-                            "INSERT INTO Thesis_Committee VALUES (?, ?)");
-                            pstmt.setInt(
-                                1, Integer.parseInt(request.getParameter("PID")));
-                            pstmt.setString(2, request.getParameter("FACULTY"));
+                            "INSERT INTO CATEGORY_LIST VALUES (?, ?)");
+
+                            pstmt.setString(1, request.getParameter("CATE_NAME"));
+                            pstmt.setString(2, request.getParameter("COURSE"));
                             int rowCount = pstmt.executeUpdate();
 
                         // Commit transaction
@@ -59,15 +59,14 @@
                         // Create the prepared statement and use it to
                         // UPDATE the student attributes in the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
-                            "UPDATE Thesis_Committee SET PID = ?, FACULTY = ?");
+                            "UPDATE CATEGORY_LIST SET CATE_NAME = ?, COURSE = ?");
 
-                            pstmt.setInt(
-                                1, Integer.parseInt(request.getParameter("PID")));
-                            pstmt.setString(2, request.getParameter("FACULTY"));
+                            pstmt.setString(1, request.getParameter("CATE_NAME"));
+                            pstmt.setString(2, request.getParameter("COURSE"));
                         //     pstmt.setInt(
                         //         3, Integer.parseInt(request.getParameter("PID")));
                         //     pstmt.setString(4, request.getParameter("FACULTY"));
-                        int rowCount = pstmt.executeUpdate();
+                         int rowCount = pstmt.executeUpdate();
 
                         // Commit transaction
                         conn.commit();
@@ -86,11 +85,10 @@
                         // Create the prepared statement and use it to
                         // DELETE the student FROM the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
-                            "DELETE FROM Thesis_Committee WHERE PID = ? AND FACULTY = ?");
+                            "DELETE FROM CATEGORY_LIST WHERE CATE_NAME = ? AND COURSE = ?");
 
-                            pstmt.setInt(
-                                1, Integer.parseInt(request.getParameter("PID")));
-                            pstmt.setString(2, request.getParameter("FACULTY"));
+                            pstmt.setString(1, request.getParameter("CATE_NAME"));
+                            pstmt.setString(2, request.getParameter("COURSE"));
                         int rowCount = pstmt.executeUpdate();
 
                         // Commit transaction
@@ -103,26 +101,35 @@
             <%
                     // Create the statement
                     Statement statement = conn.createStatement();
+                    Statement statement2 = conn.createStatement();
 
                     // Use the created statement to SELECT
                     // the student attributes FROM the Student table.
                     ResultSet rs = statement.executeQuery
-                        ("SELECT * FROM Thesis_Committee");
+                        ("SELECT * FROM CATEGORY_LIST");
             %>
 
 
             <!-- Add an HTML table header row to format the results -->
                 <table border="1">
                     <tr>
-                        <th>PID</th>
-                        <th>FACULTY</th>
+                        <th>CATE_NAME</th>
+                        <th>COURSE</th>
                         <th>Action</th>
                     </tr>
                     <tr>
-                        <form action="Thesis_Committee.jsp" method="get">
+                        <form action="catList.jsp" method="get">
                             <input type="hidden" value="insert" name="action">
-                            <th><input value="" name="PID" size="10"></th>
-                            <th><input value="" name="FACULTY" size="50"></th>
+                            <th><select name="CATE_NAME">
+                                <%
+                                ResultSet rs2 = statement2.executeQuery
+                                ("SELECT * FROM category");
+
+                                 while(rs2.next()){ %>
+                                <option><%= rs2.getString(1)%></option>
+                                <% } %>
+                            </select></th>
+                            <th><input value="" name="COURSE" size="20"></th>
                             <th><input type="submit" value="Insert"></th>
                         </form>
                     </tr>
@@ -136,19 +143,19 @@
             %>
 
                     <tr>
-                        <form action="Thesis_Committee.jsp" method="get">
+                        <form action="catList.jsp" method="get">
                             <input type="hidden" value="update" name="action">
 
-                            <%-- Get the COURSE_ID --%>
+                            <%-- Get the CATE_NAME --%>
                             <td>
-                            <input value="<%= rs.getInt("PID") %>"
-                                name="PID" size="10">
+                            <input value="<%= rs.getString("CATE_NAME") %>"
+                                name="CATE_NAME" size="20">
                             </td>
 
                             <%-- Get the PREREQ_ID --%>
                             <td>
-                                <input value="<%= rs.getString("FACULTY") %>"
-                                    name="FACULTY" size="50">
+                                <input value="<%= rs.getString("COURSE") %>"
+                                    name="COURSE" size="20">
                             </td>
 
 
@@ -157,12 +164,12 @@
                                 <input type="submit" value="Update">
                             </td>
                         </form>
-                        <form action="Thesis_Committee.jsp" method="get">
+                        <form action="catList.jsp" method="get">
                             <input type="hidden" value="delete" name="action">
                             <input type="hidden"
-                                value="<%= rs.getInt("PID") %>" name="PID">
-                                <input type="hidden"
-                                    value="<%= rs.getString("FACULTY") %>" name="FACULTY">
+                                value="<%= rs.getString("CATE_NAME") %>" name="CATE_NAME">
+                            <input type="hidden"
+                                value="<%= rs.getString("COURSE") %>" name="COURSE">
                             <%-- Button --%>
                             <td>
                                 <input type="submit" value="Delete">
@@ -177,9 +184,10 @@
             <%
                     // Close the ResultSet
                     rs.close();
-
+                    rs2.close();
                     // Close the Statement
                     statement.close();
+                    statement2.close();
                     // Close the Connection
                     conn.close();
                 } catch (SQLException sqle) {

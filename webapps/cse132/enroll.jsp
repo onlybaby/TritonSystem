@@ -104,7 +104,7 @@
             <%
                     // Create the statement
                     Statement statement = conn.createStatement();
-
+                    Statement statement2 = conn.createStatement();
                     // Use the created statement to SELECT
                     // the student attributes FROM the Student table.
                     ResultSet rs = statement.executeQuery
@@ -139,7 +139,7 @@
                         <th>Class_id</th>
                         <th>PID</th>
                         <th>GRADE_OPTION</th>
-			            <th>UNIT</th>
+			                  <th>UNIT</th>
                         <th>Action</th>
                     </tr>
                     <tr>
@@ -149,8 +149,8 @@
                             <th><select name="CLASS_ID">
                                 <%
 
-                                ResultSet rs2 = statement.executeQuery
-                                ("SELECT * FROM class WHERE course_id = '" + request.getParameter("COURSE_ID") + "' and quarter = 'SP17'");
+                                ResultSet rs2 = statement2.executeQuery
+                                ("SELECT * FROM class WHERE course_id = '" + request.getParameter("COURSE_ID") + "' and quarter = 'SPRING' and year = '2017'");
 
                                  while(rs2.next()){ %>
                                 <option><%= rs2.getInt(1)%></option>
@@ -258,7 +258,7 @@
 
                     // Close the Statement
                     statement.close();
-
+                    statement2.close();
                     // Close the Connection
                     conn.close();
                 } catch (SQLException sqle) {

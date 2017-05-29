@@ -34,13 +34,14 @@
                         // Create the prepared statement and use it to
                         // INSERT the student attributes INTO the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
-                            "INSERT INTO class VALUES (?, ?, ?, ?, ?)");
+                            "INSERT INTO class VALUES (?, ?, ?, ?, ?, ?)");
 
                         pstmt.setInt(1, Integer.parseInt(request.getParameter("CLASS_ID")));
                         pstmt.setString(2, request.getParameter("COURSE_ID"));
                         pstmt.setString(3, request.getParameter("INSTRUCTOR"));
                         pstmt.setInt(4, Integer.parseInt(request.getParameter("ENROLLMENT_LIMIT")));
                         pstmt.setString(5, request.getParameter("QUARTER"));
+                        pstmt.setInt(6, Integer.parseInt(request.getParameter("YEAR")));
                         int rowCount = pstmt.executeUpdate();
 
                         // Commit transaction
@@ -61,14 +62,15 @@
                         // UPDATE the student attributes in the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
                             "UPDATE Class SET COURSE_ID = ?, INSTRUCTOR = ?, " +
-                            "ENROLLMENT_LIMIT = ?, QUARTER = ? " +
+                            "ENROLLMENT_LIMIT = ?, QUARTER = ?, YEAR = ?" +
                             "WHERE CLASS_ID = ?");
 
                         pstmt.setString(1, request.getParameter("COURSE_ID"));
                         pstmt.setString(2, request.getParameter("INSTRUCTOR"));
                         pstmt.setInt(3, Integer.parseInt(request.getParameter("ENROLLMENT_LIMIT")));
                         pstmt.setString(4, request.getParameter("QUARTER"));
-                        pstmt.setInt(5, Integer.parseInt(request.getParameter("CLASS_ID")));
+                        pstmt.setInt(5, Integer.parseInt(request.getParameter("YEAR")));
+                        pstmt.setInt(6, Integer.parseInt(request.getParameter("CLASS_ID")));
                         int rowCount = pstmt.executeUpdate();
 
                         // Commit transaction
@@ -116,8 +118,9 @@
                         <th>Class_id</th>
                         <th>Course_id</th>
                         <th>Instructor</th>
-			            <th>Enrollment_limit</th>
+			                  <th>Enrollment_limit</th>
                         <th>Quarter</th>
+                        <th>Year</th>
                         <th>Action</th>
                     </tr>
                     <tr>
@@ -130,8 +133,14 @@
                                 <% } %>
                             </select></th>
                             <th><input value="" name="INSTRUCTOR" size="15"></th>
-			                <th><input value="" name="ENROLLMENT_LIMIT" size="15"></th>
-                            <th><input value="" name="QUARTER" size="15"></th>
+			                      <th><input value="" name="ENROLLMENT_LIMIT" size="15"></th>
+                            <th><select name="QUARTER">
+                                <option value="SPRING">SPRING</option>
+                                <option value="SUMMER">SUMMER</option>
+                                <option value="FALL">FALL</option>
+                                <option value="WINTER">WINTER</option>
+                            </select></th>
+                            <th><input value="" name="YEAR" size="10"></th>
                             <th><input type="submit" value="Insert"></th>
                         </form>
                     </tr>
@@ -186,6 +195,11 @@
                                     name="QUARTER" size="15">
                             </td>
 
+                            <%-- Get the YEAR --%>
+                            <td>
+                                <input value="<%= rs.getInt("YEAR") %>"
+                                    name="YEAR" size="15">
+                            </td>
 
                             <%-- Button --%>
                             <td>

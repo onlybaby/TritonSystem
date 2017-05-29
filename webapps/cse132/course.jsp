@@ -34,7 +34,7 @@
                         // Create the prepared statement and use it to
                         // INSERT the student attributes INTO the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
-                            "INSERT INTO course VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                            "INSERT INTO course VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
                         pstmt.setString(1, request.getParameter("COURSE_ID"));
                         pstmt.setString(2, request.getParameter("COURSE_NAME"));
@@ -44,7 +44,9 @@
                         pstmt.setString(6, request.getParameter("GRADE_OPTION"));
                         pstmt.setString(7, request.getParameter("LAB_REQUIRED"));
                         pstmt.setString(8, request.getParameter("INSTRUCTOR_CONSENT"));
-                        pstmt.setString(9, request.getParameter("CATEGORY"));
+                        pstmt.setString(9, request.getParameter("CURRENT_TAUGHT"));
+                        pstmt.setString(10, request.getParameter("NEXT_QUARTER"));
+                        pstmt.setInt(11, Integer.parseInt(request.getParameter("NEXT_YEAR")));
                         int rowCount = pstmt.executeUpdate();
 
                         // Commit transaction
@@ -64,10 +66,8 @@
                         // Create the prepared statement and use it to
                         // UPDATE the student attributes in the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
-                            "UPDATE COURSE SET COURSE_NAME = ?, MIN_UNIT = ?, " +
-                            "MAX_UNIT = ?, DEPT = ?, GRADE_OPTION = ?, " +
-                            "LAB_REQUIRED = ?, INSTRUCTOR_CONSENT = ?, " +
-                            "CATEGORY = ? WHERE COURSE_ID = ?");
+                            "UPDATE COURSE SET COURSE_NAME = ?, MIN_UNIT = ?,MAX_UNIT = ?, DEPT = ?, GRADE_OPTION = ?, LAB_REQUIRED = ?, INSTRUCTOR_CONSENT = ?, CURRENT_TAUGHT = ?, NEXT_QUARTER = ?, NEXT_YEAR = ? WHERE COURSE_ID = ?");
+
 
                         pstmt.setString(1, request.getParameter("COURSE_NAME"));
                         pstmt.setInt(2, Integer.parseInt(request.getParameter("MIN_UNIT")));
@@ -76,8 +76,10 @@
                         pstmt.setString(5, request.getParameter("GRADE_OPTION"));
                         pstmt.setString(6, request.getParameter("LAB_REQUIRED"));
                         pstmt.setString(7, request.getParameter("INSTRUCTOR_CONSENT"));
-                        pstmt.setString(8, request.getParameter("CATEGORY"));
-                        pstmt.setString(9, request.getParameter("COURSE_ID"));
+                        pstmt.setString(8, request.getParameter("CURRENT_TAUGHT"));
+                        pstmt.setString(9, request.getParameter("NEXT_QUARTER"));
+                        pstmt.setInt(10, Integer.parseInt(request.getParameter("NEXT_YEAR")));
+                        pstmt.setString(11, request.getParameter("COURSE_ID"));
                         int rowCount = pstmt.executeUpdate();
 
                         // Commit transaction
@@ -113,7 +115,6 @@
                     // Create the statement
                     Statement statement = conn.createStatement();
                     Statement statement1 = conn.createStatement();
-                    Statement statement2 = conn.createStatement();
 
                     // Use the created statement to SELECT
                     // the student attributes FROM the Student table.
@@ -121,8 +122,7 @@
                         ("SELECT * FROM Course");
                     ResultSet rs1 = statement1.executeQuery
                         ("SELECT * FROM Dept");
-                    ResultSet rs2 = statement2.executeQuery
-                        ("SELECT * FROM Category");
+
             %>
 
             <!-- Add an HTML table header row to format the results -->
@@ -131,12 +131,14 @@
                         <th>Course_id</th>
                         <th>Course_name</th>
                         <th>Min_unit</th>
-			            <th>Max_unit</th>
+			                  <th>Max_unit</th>
                         <th>Dept</th>
                         <th>Grade_option</th>
                         <th>Lab_required</th>
                         <th>Instructor_consent</th>
-                        <th>Category</th>
+                        <th>Currently Taught</th>
+                        <th>Next Offered Quarter</th>
+                        <th>Next Offered Year</th>
                         <th>Action</th>
                     </tr>
                     <tr>
@@ -164,11 +166,17 @@
                                 <option value="Yes">Yes</option>
                                 <option value="No">No</option>
                             </select></th>
-                            <th><select name="CATEGORY">
-                                <%  while(rs2.next()){ %>
-                                <option><%= rs2.getString(1)%></option>
-                                <% } %>
+                            <th><select name="CURRENT_TAUGHT">
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
                             </select></th>
+                            <th><select name="NEXT_QUARTER">
+                                <option value="SPRING">SPRING</option>
+                                <option value="SUMMER">SUMMER</option>
+                                <option value="FALL">FALL</option>
+                                <option value="WINTER">WINTER</option>
+                            </select></th>
+                            <th><input value="" name="NEXT_YEAR" size="10"></th>
                             <th><input type="submit" value="Insert"></th>
                         </form>
                     </tr>
@@ -206,7 +214,7 @@
                             <%-- Get the MAX_UNIT --%>
                             <td>
                                 <input value="<%= rs.getInt("MAX_UNIT") %>"
-                                    name="MIN_UNIT" size="15">
+                                    name="MAX_UNIT" size="15">
                             </td>
 
                             <%-- Get the DEPT --%>
@@ -233,10 +241,22 @@
                                     name="INSTRUCTOR_CONSENT" size="15">
                             </td>
 
-                            <%-- Get the CATEGORY --%>
+                            <%-- Get the CURRENT_TAUGHT --%>
                             <td>
-                                <input value="<%= rs.getString("CATEGORY") %>"
-                                    name="CATEGORY" size="15">
+                                <input value="<%= rs.getString("CURRENT_TAUGHT") %>"
+                                    name="CURRENT_TAUGHT" size="15">
+                            </td>
+
+                            <%-- Get the NEXT_QUARTER --%>
+                            <td>
+                                <input value="<%= rs.getString("NEXT_QUARTER") %>"
+                                    name="NEXT_QUARTER" size="15">
+                            </td>
+
+                            <%-- Get the NEXT_YEAR --%>
+                            <td>
+                                <input value="<%= rs.getInt("NEXT_YEAR") %>"
+                                    name="NEXT_YEAR" size="15">
                             </td>
 
                             <%-- Button --%>
@@ -263,12 +283,10 @@
                     // Close the ResultSet
                     rs.close();
                     rs1.close();
-                    rs2.close();
 
                     // Close the Statement
                     statement.close();
                     statement1.close();
-                    statement2.close();
 
                     // Close the Connection
                     conn.close();

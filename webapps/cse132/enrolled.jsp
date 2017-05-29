@@ -34,7 +34,7 @@
                         // Create the prepared statement and use it to
                         // INSERT the student attributes INTO the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
-                            "INSERT INTO enrolled_list VALUES (?, ?, ?, ?, ?, ?, ?)");
+                            "INSERT INTO enrolled_list VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 
                         pstmt.setInt(1, Integer.parseInt(request.getParameter("CLASS_ID")));
                         pstmt.setString(2, request.getParameter("COURSE_ID"));
@@ -43,6 +43,7 @@
                         pstmt.setString(5, request.getParameter("GRADE_RECEIVED"));
                         pstmt.setInt(6, Integer.parseInt(request.getParameter("UNIT")));
                         pstmt.setString(7, request.getParameter("QUARTER"));
+                        pstmt.setInt(8, Integer.parseInt(request.getParameter("YEAR")));
                         int rowCount = pstmt.executeUpdate();
 
                         // Commit transaction
@@ -63,7 +64,7 @@
                         // UPDATE the student attributes in the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
                             "UPDATE enrolled_list SET course_id = ?, grade_option = ?, grade_received = ?, " +
-                            "unit = ?, quarter = ? " +
+                            "unit = ?, quarter = ?, year = ? " +
                             "WHERE CLASS_ID = ? AND PID = ?");
 
                         pstmt.setString(1, request.getParameter("COURSE_ID"));
@@ -71,8 +72,9 @@
                         pstmt.setString(3, request.getParameter("GRADE_RECEIVED"));
                         pstmt.setInt(4, Integer.parseInt(request.getParameter("UNIT")));
                         pstmt.setString(5, request.getParameter("QUARTER"));
-                        pstmt.setInt(6, Integer.parseInt(request.getParameter("CLASS_ID")));
-                        pstmt.setInt(7, Integer.parseInt(request.getParameter("PID")));
+                        pstmt.setInt(6, Integer.parseInt(request.getParameter("YEAR")));
+                        pstmt.setInt(7, Integer.parseInt(request.getParameter("CLASS_ID")));
+                        pstmt.setInt(8, Integer.parseInt(request.getParameter("PID")));
                         int rowCount = pstmt.executeUpdate();
 
                         // Commit transaction
@@ -108,6 +110,8 @@
             <%
                     // Create the statement
                     Statement statement = conn.createStatement();
+                    Statement statement2 = conn.createStatement();
+                    Statement statement3 = conn.createStatement();
 
                     // Use the created statement to SELECT
                     // the student attributes FROM the Student table.
@@ -122,7 +126,8 @@
 
                     <tr>
                         <th>Course_id</th>
-                        <th>QUARTER</th>
+                        <th>Quarter</th>
+                        <th>Year</th>
                         <th>Action</th>
                     </tr>
 
@@ -135,7 +140,13 @@
                                 <option><%= rs.getString(1)%></option>
                                 <% } %>
                             </select></th>
-                            <th><input value="" name="QUARTER" size="10"></th>
+                            <th><select name="QUARTER">
+                                <option value="SPRING">SPRING</option>
+                                <option value="SUMMER">SUMMER</option>
+                                <option value="FALL">FALL</option>
+                                <option value="WINTER">WINTER</option>
+                            </select></th>
+                            <th><input value="" name="YEAR" size="10"></th>
                             <th><input type="submit" value="getCID"></th>
                         </form>
                     </tr>
@@ -146,8 +157,9 @@
                         <th>PID</th>
                         <th>GRADE_OPTION</th>
                         <th>GRADE_RECEIVED</th>
-			            <th>UNIT</th>
-                        <th>QUARTER</th>
+			                  <th>Unit</th>
+                        <th>Quarter</th>
+                        <th>Year</th>
                         <th>Action</th>
                     </tr>
                     <tr>
@@ -157,8 +169,8 @@
                             <th><select name="CLASS_ID">
                                 <%
 
-                                ResultSet rs2 = statement.executeQuery
-                                ("SELECT * FROM class WHERE course_id = '" + request.getParameter("COURSE_ID") + "' and quarter = '" + request.getParameter("QUARTER") + "'");
+                                ResultSet rs2 = statement2.executeQuery
+                                ("SELECT * FROM class WHERE course_id = '" + request.getParameter("COURSE_ID") + "' and quarter = '" + request.getParameter("QUARTER") + "' and year = '" + request.getParameter("YEAR")+ "'");
 
                                  while(rs2.next()){ %>
                                 <option><%= rs2.getInt(1)%></option>
@@ -173,7 +185,7 @@
                             <th><input value="" name="GRADE_RECEIVED" size="10"></th>
 			                <th><select name="UNIT">
                                 <%
-                                ResultSet rs3 = statement.executeQuery
+                                ResultSet rs3 = statement3.executeQuery
                                 ("SELECT * FROM course WHERE course_id = '" + request.getParameter("COURSE_ID") + "'");
 
                                  while(rs3.next()){
@@ -183,6 +195,7 @@
                                 <% } }%>
                             </select></th>
                             <th><input value = <%= request.getParameter("QUARTER")%> name = "QUARTER" size="10"></th>
+                            <th><input value = <%= request.getParameter("YEAR")%> name = "YEAR" size="10"></th>
                             <th><input type="submit" value="Insert"></th>
                         </form>
                     </tr>
@@ -280,6 +293,8 @@
 
                     // Close the Statement
                     statement.close();
+                    statement2.close();
+                    statement3.close();
 
                     // Close the Connection
                     conn.close();
