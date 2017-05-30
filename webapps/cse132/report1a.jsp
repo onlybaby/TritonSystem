@@ -31,7 +31,7 @@
                     // Use the created statement to SELECT
                     // the student attributes FROM the Student table.
                     ResultSet rs = statement.executeQuery
-                        ("SELECT * FROM student");
+                        ("SELECT Distinct s.* FROM student s, enroll_current e where s.id = e.pid");
 
             %>
 
