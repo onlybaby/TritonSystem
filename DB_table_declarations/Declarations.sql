@@ -260,3 +260,19 @@ CREATE TABLE REVIEW_SESSIONS(
   ROOM_REVIEW VARCHAR(20) NOT NULL,
   CONSTRAINT PK_REVIEW PRIMARY KEY(CLASS_ID, DATE_REVIEW, START_REVIEW, END_REVIEW, ROOM_REVIEW)
 );
+
+create table GRADE_CONVERSION
+( LETTER_GRADE CHAR(2) NOT NULL,
+NUMBER_GRADE DECIMAL(2,1)
+);
+insert into grade_conversion values('A+', 4.0);
+insert into grade_conversion values('A', 4.0);
+insert into grade_conversion values('A-', 3.7);
+insert into grade_conversion values('B+', 3.3);
+insert into grade_conversion values('B', 3.0);
+insert into grade_conversion values('B-', 2.7);
+insert into grade_conversion values('C+', 2.3);
+insert into grade_conversion values('C', 2.0);
+insert into grade_conversion values('C-', 1.7);
+insert into grade_conversion values('D', 1.0);
+insert into grade_conversion values('F', 0.0);
