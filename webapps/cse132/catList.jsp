@@ -36,10 +36,12 @@
                         // Create the prepared statement and use it to
                         // INSERT the student attributes INTO the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
-                            "INSERT INTO CATEGORY_LIST VALUES (?, ?)");
+                            "INSERT INTO CATEGORY_LIST VALUES (?, ?, ?, ?)");
 
                             pstmt.setString(1, request.getParameter("CATE_NAME"));
                             pstmt.setString(2, request.getParameter("COURSE"));
+                            pstmt.setString(3, request.getParameter("DEGREE_NAME"));
+                            pstmt.setString(4, request.getParameter("DEGREE_TYPE"));
                             int rowCount = pstmt.executeUpdate();
 
                         // Commit transaction
@@ -59,10 +61,12 @@
                         // Create the prepared statement and use it to
                         // UPDATE the student attributes in the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
-                            "UPDATE CATEGORY_LIST SET CATE_NAME = ?, COURSE = ?");
+                            "UPDATE CATEGORY_LIST SET CATE_NAME = ?, COURSE = ?, DEGREE_NAME = ?, DEGREE_TYPE = ?");
 
                             pstmt.setString(1, request.getParameter("CATE_NAME"));
                             pstmt.setString(2, request.getParameter("COURSE"));
+                            pstmt.setString(3, request.getParameter("DEGREE_NAME"));
+                            pstmt.setString(4, request.getParameter("DEGREE_TYPE"));
                         //     pstmt.setInt(
                         //         3, Integer.parseInt(request.getParameter("PID")));
                         //     pstmt.setString(4, request.getParameter("FACULTY"));
@@ -85,10 +89,12 @@
                         // Create the prepared statement and use it to
                         // DELETE the student FROM the Student table.
                         PreparedStatement pstmt = conn.prepareStatement(
-                            "DELETE FROM CATEGORY_LIST WHERE CATE_NAME = ? AND COURSE = ?");
+                            "DELETE FROM CATEGORY_LIST WHERE CATE_NAME = ? AND COURSE = ? AND DEGREE_NAME = ? AND DEGREE_TYPE = ?");
 
                             pstmt.setString(1, request.getParameter("CATE_NAME"));
                             pstmt.setString(2, request.getParameter("COURSE"));
+                            pstmt.setString(3, request.getParameter("DEGREE_NAME"));
+                            pstmt.setString(4, request.getParameter("DEGREE_TYPE"));
                         int rowCount = pstmt.executeUpdate();
 
                         // Commit transaction
@@ -102,7 +108,8 @@
                     // Create the statement
                     Statement statement = conn.createStatement();
                     Statement statement2 = conn.createStatement();
-
+                    Statement statement1 = conn.createStatement();
+                    Statement statement3 = conn.createStatement();
                     // Use the created statement to SELECT
                     // the student attributes FROM the Student table.
                     ResultSet rs = statement.executeQuery
@@ -115,6 +122,8 @@
                     <tr>
                         <th>CATE_NAME</th>
                         <th>COURSE</th>
+                        <th>DEGREE NAME</th>
+                        <th>DEGREE TYPE</th>
                         <th>Action</th>
                     </tr>
                     <tr>
@@ -130,6 +139,24 @@
                                 <% } %>
                             </select></th>
                             <th><input value="" name="COURSE" size="20"></th>
+                            <th><select name="DEGREE_NAME">
+                                <%
+                                ResultSet rs1 = statement1.executeQuery
+                                ("SELECT DISTINCT DEGREE_NAME FROM degree");
+
+                                 while(rs1.next()){ %>
+                                <option><%= rs1.getString(1)%></option>
+                                <% } %>
+                            </select></th>
+                            <th><select name="DEGREE_TYPE">
+                                <%
+                                ResultSet rs3 = statement3.executeQuery
+                                ("SELECT DISTINCT DEGREE_TYPE FROM degree");
+
+                                 while(rs3.next()){ %>
+                                <option><%= rs3.getString(1)%></option>
+                                <% } %>
+                            </select></th>
                             <th><input type="submit" value="Insert"></th>
                         </form>
                     </tr>
@@ -158,6 +185,18 @@
                                     name="COURSE" size="20">
                             </td>
 
+                            <%-- Get the DEGREE_NAME --%>
+                            <td>
+                                <input value="<%= rs.getString("DEGREE_NAME") %>"
+                                    name="DEGREE_NAME" size="20">
+                            </td>
+
+                            <%-- Get the DEGREE_TYPE --%>
+                            <td>
+                                <input value="<%= rs.getString("DEGREE_TYPE") %>"
+                                    name="DEGREE_TYPE" size="20">
+                            </td>
+
 
                             <%-- Button --%>
                             <td>
@@ -170,6 +209,10 @@
                                 value="<%= rs.getString("CATE_NAME") %>" name="CATE_NAME">
                             <input type="hidden"
                                 value="<%= rs.getString("COURSE") %>" name="COURSE">
+                            <input type="hidden"
+                                value="<%= rs.getString("DEGREE_NAME") %>" name="DEGREE_NAME">
+                            <input type="hidden"
+                                value="<%= rs.getString("DEGREE_TYPE") %>" name="DEGREE_TYPE">
                             <%-- Button --%>
                             <td>
                                 <input type="submit" value="Delete">
@@ -184,10 +227,14 @@
             <%
                     // Close the ResultSet
                     rs.close();
+                    rs1.close();
                     rs2.close();
+                    rs3.close();
                     // Close the Statement
                     statement.close();
+                    statement1.close();
                     statement2.close();
+                    statement3.close();
                     // Close the Connection
                     conn.close();
                 } catch (SQLException sqle) {
