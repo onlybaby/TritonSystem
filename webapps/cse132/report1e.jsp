@@ -67,9 +67,10 @@
                             <th><input type="submit" value="select_Info"></th>
                         </form>
                     </tr>
-
+                    </table>
+                    <table border = "5">
                     <tr>
-                        <th>Completed Concentrations</th>
+                        <td>Completed Concentrations</td>
                     </tr>
                     <tr>
                         <th>Concentration Name</th>
@@ -80,24 +81,26 @@
             <%
                     // Iterate over the ResultSet
                     ResultSet rs2 = statement2.executeQuery
-                        ("SELECT distinct c.con_name " +
+                        ("with newCal as " +
+                        "(SELECT distinct c.con_name as concentration, SUM(g.NUMBER_GRADE) " +
+                        "as totalGrade, COUNT(e.unit) as totalUnit, SUM(e.unit), " +
+                        "(SUM(g.NUMBER_GRADE)/ COUNT(e.unit)), cd.gpa " +
                         "from concentration_degree cd " +
-                        "inner join concentration_list c " +
-                        "on cd.con_name = c.con_name " +
-                        "inner join enrolled_list e " +
-                        "on c.course = e.COURSE_ID " +
+                        "inner join concentration_list c on cd.con_name = c.con_name "+
+                        "inner join enrolled_list e on c.course = e.COURSE_ID "+
                         "inner join GRADE_CONVERSION g ON e.GRADE_RECEIVED = g.LETTER_GRADE " +
-                        "where cd.DEPT = '" + request.getParameter("DEGREE_NAME/TYPE") + "' and cd.degree_type = " + "'MS'and e.pid = '" + request.getParameter("STUDENT") + "' " +
-                        "AND e.GRADE_OPTION != 'S/U' " +
-                        "AND (cd.MIN_UNIT <= ( " +
-                          "select sum(unit) " +
-                          "from enrolled_list " +
-                          "where COURSE_ID in ( " +
-                            "select course " +
-                            "from concentration_list " +
-                            "where con_name = c.con_name) and pid = '" + request.getParameter("STUDENT") + "')) " +
-                        "AND ((SELECT SUM(g.NUMBER_GRADE) FROM GRADE_CONVERSION g)/(SELECT COUNT(e.UNIT) FROM enrolled_list e)) >= cd.gpa " +
-                        "group by c.con_name ");
+                        "where cd.DEPT = '" + request.getParameter("DEGREE_NAME/TYPE") + "' "+
+                        "and cd.DEGREE_TYPE = 'MS'and e.pid = '" + request.getParameter("STUDENT") + "' " +
+                        "and e.grade_option = 'Letter Grade' and " +
+                        "cd.MIN_UNIT <= (select sum(unit) "+
+                        "from enrolled_list where COURSE_ID in " +
+                        "(select course from concentration_list where con_name = c.con_name) " +
+                        "and pid = '" + request.getParameter("STUDENT") + "') " +
+                        "AND GRADE_OPTION = 'Letter Grade' " +
+                        "group by c.con_name, cd.gpa) "+
+                        "select newCal.concentration, (newCal.totalGrade/ newCal.totalUnit) as avgGPA "+
+                        "from newCal " +
+                        "where  newCal.gpa <= (newCal.totalGrade/ newCal.totalUnit);");
 
                     // rs.close();
                     //
@@ -122,17 +125,70 @@
             <%
                     }
             %>
-
+            </table>
+            <table border = "5">
             <tr>
-                <th>Not Completed Concentration Course </th>
+                <td>Not Completed Concentration Course </td>
             </tr>
             <tr>
                 <th>Concentration Name</th>
                 <th>Course Name</th>
-                <th>Next Offered</th>
+                <th>Next Offered Quarter</th>
+                <th>Next Offered Year</th>
             </tr>
 
             <%-- -------- Iteration Code -------- --%>
+            <%
+                    // Iterate over the ResultSet
+                    ResultSet rs3 = statement3.executeQuery
+                        ("with notComp as ( " +
+                          "SELECT distinct con_name, course " +
+                          "from concentration_list " +
+                          "where course NOT IN " +
+                            "(select COURSE_ID from enrolled_list "+
+                            "where pid = '" + request.getParameter("STUDENT") + "')) "+
+                        "select n.con_name, n.course, c.NEXT_QUARTER , c.NEXT_YEAR " +
+                        "from notComp n inner join course c on n.course = c.course_id ");
+
+                    // rs.close();
+                    //
+                    // rs = statement.executeQuery
+                    //     ("SELECT * FROM enroll_current");
+
+                    while ( rs3.next() ) {
+
+            %>
+
+                    <tr>
+                        <form action="report1e.jsp" method="post">
+
+
+                            <%-- Get the CONCENTRATION NAME --%>
+                            <td>
+                              <%= rs3.getString(1) %>
+                            </td>
+
+                            <%-- Get the COURSE NAME --%>
+                            <td>
+                              <%= rs3.getString(2) %>
+                            </td>
+
+                            <%-- Get the NEXT_QUARTER --%>
+                            <td>
+                              <%= rs3.getString(3) %>
+                            </td>
+
+                            <%-- Get the NEXT YEAR --%>
+                            <td>
+                              <%= rs3.getString(4) %>
+                            </td>
+
+                        </form>
+                    </tr>
+            <%
+                    }
+            %>
+
 
             <%-- -------- Close Connection Code -------- --%>
             <%
@@ -140,13 +196,13 @@
                     rs.close();
                     rs1.close();
                     rs2.close();
-                    // rs3.close();
+                    rs3.close();
 
                     // Close the Statement
                     statement.close();
                     statement1.close();
                     statement2.close();
-                    // statement3.close();
+                    statement3.close();
                     // Close the Connection
                     conn.close();
                 } catch (SQLException sqle) {

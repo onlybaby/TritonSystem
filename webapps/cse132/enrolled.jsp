@@ -66,8 +66,9 @@
                             "UPDATE enrolled_list SET course_id = ?, grade_option = ?, grade_received = ?, " +
                             "unit = ?, quarter = ?, year = ? " +
                             "WHERE CLASS_ID = ? AND PID = ?");
-
+                        // pstmt.setInt(1, Integer.parseInt(request.getParameter("CLASS_ID")));
                         pstmt.setString(1, request.getParameter("COURSE_ID"));
+                        // pstmt.setInt(3, Integer.parseInt(request.getParameter("PID")));;
                         pstmt.setString(2, request.getParameter("GRADE_OPTION"));
                         pstmt.setString(3, request.getParameter("GRADE_RECEIVED"));
                         pstmt.setInt(4, Integer.parseInt(request.getParameter("UNIT")));
@@ -260,6 +261,11 @@
                             <td>
                                 <input value="<%= rs.getString("QUARTER") %>"
                                     name="QUARTER" size="15">
+                            </td>
+
+                            <td>
+                                <input value="<%= rs.getInt("YEAR") %>"
+                                    name="YEAR" size="15">
                             </td>
 
 

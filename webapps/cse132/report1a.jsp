@@ -12,12 +12,12 @@
             <%-- Set the scripting language to Java and --%>
             <%-- Import the java.sql package --%>
             <%@ page language="java" import="java.sql.*" %>
-    
+
             <%-- -------- Open Connection Code -------- --%>
             <%
                 try {
                     Class.forName("org.postgresql.Driver");
-                    String dbURL = "jdbc:postgresql:cse132?user=postgres&password=admin";
+                    String dbURL = "jdbc:postgresql://localhost:9999/cse132?user=postgres&password=admin";
                     Connection conn = DriverManager.getConnection(dbURL);
 
             %>
@@ -31,13 +31,13 @@
                     // Use the created statement to SELECT
                     // the student attributes FROM the Student table.
                     ResultSet rs = statement.executeQuery
-                        ("SELECT Distinct s.* FROM student s, enroll_current e where s.id = e.pid");
+                        ("SELECT Distinct s.* FROM student s, enroll_current e where s.id = e.pid ORDER BY s.id");
 
             %>
 
             <!-- Add an HTML table header row to format the results -->
                 <table border="1">
-                    
+
 
                     <tr>
                         <th>Student</th>
@@ -47,7 +47,7 @@
                     <tr>
                         <form action="report1a.jsp" method="get">
                             <input type="hidden" value="Select_Student" name="action">
-                            
+
                             <th><select name="ID">
                                 <%  while(rs.next()){ %>
                                 <option value="<%= rs.getString(1)%>" > <%= rs.getString(1) + ", " + rs.getString(3) + ", " + rs.getString(4) + ", " + rs.getString(5) %></option>
@@ -66,7 +66,7 @@
                         <th>Units</th>
                         <th>Section</th>
                     </tr>
-                    
+
 
             <%-- -------- Iteration Code -------- --%>
             <%
@@ -75,18 +75,18 @@
                     ResultSet rs2;
 
                     rs2 = statement.executeQuery("SELECT * FROM course ");
-                    
 
-                    
+
+
                     if (request.getParameter("ID") != null){
-                   
+
                     rs2 = statement.executeQuery
-                        ("SELECT c.*, e.* , o.* FROM course c INNER JOIN quarter_offered o ON c.course_id = o.course_id INNER JOIN enroll_current e ON o.course_id = e.course_id WHERE pid = '" + request.getParameter("ID") + "'" );
-                    
-                    
+                        ("SELECT c.*, e.* , o.* FROM course c INNER JOIN quarter_offered o ON c.course_id = o.course_id FULL JOIN enroll_current e ON o.course_id = e.course_id WHERE pid = '" + request.getParameter("ID") + "'" );
+
+
 
                     while ( rs2.next() ) {
-        
+
             %>
 
                     <tr>
@@ -103,13 +103,13 @@
                             <td>
                                 <%= rs2.getString("COURSE_ID") %>
                             </td>
-    
-    
+
+
                             <%-- Get the QUARTER_OFFERED --%>
                             <td>
-                                <%= rs2.getString("OFFERED_QUARTER") + " " + rs2.getString("OFFERED_YEAR") %>
+                                <%= rs2.getString("OFFERED_QUARTER") %>
                             </td>
-    
+
                             <%-- Get the CURRENTLY_TAUGHT --%>
                             <td>
                                 <%= rs2.getString("CURRENT_TAUGHT") %>
@@ -144,10 +144,10 @@
                     // Close the ResultSet
                     rs.close();
                     rs2.close();
-    
+
                     // Close the Statement
                     statement.close();
-    
+
                     // Close the Connection
                     conn.close();
                 } catch (SQLException sqle) {

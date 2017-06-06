@@ -12,12 +12,12 @@
             <%-- Set the scripting language to Java and --%>
             <%-- Import the java.sql package --%>
             <%@ page language="java" import="java.sql.*" %>
-    
+
             <%-- -------- Open Connection Code -------- --%>
             <%
                 try {
                     Class.forName("org.postgresql.Driver");
-                    String dbURL = "jdbc:postgresql:cse132?user=postgres&password=admin";
+                    String dbURL = "jdbc:postgresql://localhost:9999/cse132?user=postgres&password=admin";
                     Connection conn = DriverManager.getConnection(dbURL);
 
             %>
@@ -31,13 +31,13 @@
                     // Use the created statement to SELECT
                     // the student attributes FROM the Student table.
                     ResultSet rs = statement.executeQuery
-                        ("SELECT e.class_id, c.course_id, c.course_name FROM course c, enroll_current e where c.course_id = e.course_id");
+                        ("SELECT DISTINCT e.class_id, c.course_id, c.course_name FROM course c, enroll_current e where c.course_id = e.course_id ORDER BY e.class_id");
 
             %>
 
             <!-- Add an HTML table header row to format the results -->
                 <table border="1">
-                    
+
 
                     <tr>
                         <th>Section</th>
@@ -49,7 +49,7 @@
                     <tr>
                         <form action="report2b.jsp" method="get">
                             <input type="hidden" value="Select_Section" name="action">
-                            
+
                             <th><select name="ID">
                                 <%  while(rs.next()){ %>
                                 <option value="<%= rs.getString(1)%>" > <%= rs.getString(1) + ", " + rs.getString(2) + ", " + rs.getString(3) %></option>
@@ -78,7 +78,7 @@
                         <th>Start Time</th>
                         <th>End Time</th>
                     </tr>
-                    
+
 
             <%-- -------- Iteration Code -------- --%>
             <%
@@ -90,7 +90,7 @@
 
                     getString[0] = "hello world";
 
-                    
+
                     if (request.getParameter("ID") != null){
 
                         getString[1] = "SELECT 'MON' AS DAY, t.* FROM time_slot t WHERE NOT EXISTS ( SELECT * FROM enroll_current e1, enroll_current e2, weekly_meetings w WHERE e1.class_id = '" + request.getParameter("ID") + "' AND w.day_weekly = 'MON' AND e1.pid = e2.pid AND e2.class_id = w.class_id AND ((w.start_weekly > t.begin_time AND w.start_weekly < t.end_time) OR (w.end_weekly > t.begin_time AND w.end_weekly < t.end_time) OR (w.start_weekly = t.begin_time AND w.end_weekly = t.end_time)))";
@@ -110,22 +110,22 @@
 
                         String sql = "(" + getString[getStart] + ")";
 
-                        
+
                         for(int i = getStart+1; i <=getEnd; i++){
                             sql += "UNION ( " + getString[i] + ")";
                         }
 
                         String newsql = sql;
-                        
+
                         if(getStart != getEnd){
                             newsql = "SELECT * from(" + sql + ") AS t Order by CASE t.DAY WHEN 'MON' THEN 0 WHEN 'TUE' THEN 1 WHEN 'WED' THEN 2 WHEN 'THURS' THEN 3 WHEN 'FRI' THEN 4 ELSE 5 END, begin_time";
                         }
 
-                        rs1 = statement.executeQuery(newsql);              
+                        rs1 = statement.executeQuery(newsql);
 
 
                     while ( rs1.next() ) {
-        
+
             %>
 
                     <tr>
@@ -142,8 +142,8 @@
                             <td>
                                 <%= rs1.getString(2) %>
                             </td>
-    
-    
+
+
                             <%-- Get the CONFLICT_NUMBER --%>
                             <td>
                                 <%= rs1.getString(3) %>
@@ -162,10 +162,10 @@
                     // Close the ResultSet
                     rs.close();
                     rs1.close();
-    
+
                     // Close the Statement
                     statement.close();
-    
+
                     // Close the Connection
                     conn.close();
                 } catch (SQLException sqle) {

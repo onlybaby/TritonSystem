@@ -34,7 +34,7 @@
                     ResultSet rs = statement.executeQuery
                         ("SELECT s.* FROM Student s INNER JOIN Undergrad u on s.ID = u.PID WHERE s.enrollment = 'YES'");
                     ResultSet rs1 = statement1.executeQuery
-                        ("SELECT distinct * FROM degree WHERE DEGREE_TYPE = 'BS'");
+                        ("SELECT distinct * FROM degree WHERE DEGREE_TYPE <> 'MS'");
 
 
 
@@ -67,48 +67,8 @@
                             <th><input type="submit" value="select_Info"></th>
                         </form>
                     </tr>
-
-                    <tr>
-                        <th>Degree Requirements</th>
-                    </tr>
-                    <tr>
-                        <th>Degree Name</th>
-                        <th>Units Left For Degree</th>
-                    </tr>
-
-            <%-- -------- Iteration Code -------- --%>
-            <%
-                    // Iterate over the ResultSet
-                    ResultSet rs2 = statement2.executeQuery
-                        ("SELECT DEGREE_NAME, ((SELECT units FROM degree WHERE degree_name = '" + request.getParameter("DEGREE_NAME/TYPE")+ "' AND DEGREE_TYPE = 'BS') - (SELECT SUM(unit) FROM enrolled_list WHERE COURSE_ID IN (SELECT course FROM CATEGORY_LIST WHERE degree_name = '" + request.getParameter("DEGREE_NAME/TYPE") + "'AND DEGREE_TYPE = 'BS' AND PID = '" + request.getParameter("STUDENT") + "'))) FROM degree WHERE DEGREE_NAME = '" + request.getParameter("DEGREE_NAME/TYPE") + "' AND DEGREE_TYPE = 'BS'");
-
-                    // rs.close();
-                    //
-                    // rs = statement.executeQuery
-                    //     ("SELECT * FROM enroll_current");
-
-                    while ( rs2.next() ) {
-
-            %>
-
-                    <tr>
-                        <form action="report1d.jsp" method="post">
-
-
-                            <%-- Get the DEGREE_NAME --%>
-                            <td>
-                              <%= rs2.getString("DEGREE_NAME") %>
-                            </td>
-                              <%-- Get the UNITS LEFT --%>
-                            <td>
-                              <%= rs2.getInt(2) %>
-                            </td>
-
-                        </form>
-                    </tr>
-            <%
-                    }
-            %>
+                  </table>
+                  <table border = "5">
 
             <tr>
                 <th>Category Requirements</th>
@@ -122,12 +82,13 @@
             <%
                     // Iterate over the ResultSet
                     ResultSet rs3 = statement3.executeQuery
-                        ("SELECT c.cate_name, case when (c.MIN_UNIT - (SELECT SUM(e.unit) FROM enrolled_list e INNER JOIN CATEGORY_LIST cl ON e.COURSE_ID = cl.course WHERE cl.cate_name = c.cate_name AND cl.degree_name = c.MAJOR AND cl.DEGREE_TYPE = 'BS' and e.pid = '" + request.getParameter("STUDENT") + "')) IS NULL THEN c.MIN_UNIT ELSE (c.MIN_UNIT - (SELECT SUM(e.unit) FROM enrolled_list e INNER JOIN CATEGORY_LIST cl ON e.COURSE_ID = cl.course WHERE cl.cate_name = c.cate_name AND cl.degree_name = c.MAJOR AND cl.DEGREE_TYPE = 'BS' and e.pid = '" + request.getParameter("STUDENT") + "')) END FROM category_degree c WHERE c.MAJOR = '" + request.getParameter("DEGREE_NAME/TYPE") + "' AND c.DEGREE_TYPE = 'BS'");
+                        ("SELECT c.cate_name, case when (c.MIN_UNIT - (SELECT SUM(e.unit) FROM enrolled_list e INNER JOIN CATEGORY_LIST cl ON e.COURSE_ID = cl.course WHERE cl.cate_name = c.cate_name AND cl.degree_name = c.MAJOR AND cl.DEGREE_TYPE <> 'MS' and e.pid = '" + request.getParameter("STUDENT") + "')) IS NULL THEN c.MIN_UNIT ELSE (c.MIN_UNIT - (SELECT SUM(e.unit) FROM enrolled_list e INNER JOIN CATEGORY_LIST cl ON e.COURSE_ID = cl.course WHERE cl.cate_name = c.cate_name AND cl.degree_name = c.MAJOR AND cl.DEGREE_TYPE <> 'MS' and e.pid = '" + request.getParameter("STUDENT") + "')) END FROM category_degree c WHERE c.MAJOR = '" + request.getParameter("DEGREE_NAME/TYPE") + "' AND c.DEGREE_TYPE <> 'MS'");
 
                     // rs.close();
                     //
                     // rs = statement.executeQuery
                     //     ("SELECT * FROM enroll_current");
+                    int unitsLeft = 0;
 
                     while ( rs3.next() ) {
 
@@ -149,15 +110,58 @@
                         </form>
                     </tr>
             <%
+                unitsLeft+= rs3.getInt(2);
                     }
             %>
+
+            <tr align = "center">
+                <td>Degree Requirements</td>
+            </tr>
+            <tr>
+                <th>Degree Name</th>
+                <th>Units Left For Degree</th>
+            </tr>
+
+    <%-- -------- Iteration Code -------- --%>
+    <%
+            // Iterate over the ResultSet
+            ResultSet rs2 = statement2.executeQuery
+                ("SELECT DEGREE_NAME, ((SELECT units FROM degree WHERE degree_name = '" + request.getParameter("DEGREE_NAME/TYPE")+ "' AND DEGREE_TYPE <> 'MS') - (SELECT SUM(unit) FROM enrolled_list WHERE COURSE_ID IN (SELECT course FROM CATEGORY_LIST WHERE degree_name = '" + request.getParameter("DEGREE_NAME/TYPE") + "'AND DEGREE_TYPE <> 'MS' AND PID = '" + request.getParameter("STUDENT") + "'))) FROM degree WHERE DEGREE_NAME = '" + request.getParameter("DEGREE_NAME/TYPE") + "' AND DEGREE_TYPE <> 'MS'");
+
+            // rs.close();
+            //
+            // rs = statement.executeQuery
+            //     ("SELECT * FROM enroll_current");
+
+           while ( rs2.next() ) {
+
+    %>
+
+            <tr>
+                <form action="report1d.jsp" method="post">
+
+
+                    <%-- Get the DEGREE_NAME --%>
+                    <td>
+                      <%= request.getParameter("DEGREE_NAME/TYPE") %>
+                    </td>
+                      <%-- Get the UNITS LEFT --%>
+                    <td>
+                      <%= rs2.getString(2) %>
+                    </td>
+
+                </form>
+            </tr>
+     <%
+            }
+     %>
 
             <%-- -------- Close Connection Code -------- --%>
             <%
                     // Close the ResultSet
                     rs.close();
                     rs1.close();
-                    rs2.close();
+                    //rs2.close();
                     rs3.close();
 
                     // Close the Statement

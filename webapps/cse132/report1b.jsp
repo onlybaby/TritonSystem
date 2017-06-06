@@ -30,7 +30,7 @@
                     // Use the created statement to SELECT
                     // the student attributes FROM the Student table.
                     ResultSet rs = statement.executeQuery
-                        ("SELECT distinct c.course_id, cl.quarter, cl.year FROM class cl INNER JOIN course c ON cl.course_id = c.course_id WHERE cl.QUARTER = 'SPRING' AND cl.YEAR = 2017 ");
+                        ("SELECT distinct c.course_id, cl.quarter, cl.year FROM class cl INNER JOIN course c ON cl.course_id = c.course_id WHERE cl.QUARTER = 'sp' AND cl.YEAR = 2017 ");
 
 
 
@@ -59,8 +59,10 @@
                     </tr>
 
                     <tr></tr>
-                    <tr>
-                        <th>Enrollment Information</th>
+                  </table>
+                  <table border = "5">
+                    <tr align="center">
+                        <td>Enrollment Information</td>
                     </tr>
                     <tr></tr>
                     <tr></tr>

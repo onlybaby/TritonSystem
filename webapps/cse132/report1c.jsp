@@ -12,12 +12,12 @@
             <%-- Set the scripting language to Java and --%>
             <%-- Import the java.sql package --%>
             <%@ page language="java" import="java.sql.*" %>
-    
+
             <%-- -------- Open Connection Code -------- --%>
             <%
                 try {
                     Class.forName("org.postgresql.Driver");
-                    String dbURL = "jdbc:postgresql:cse132?user=postgres&password=admin";
+                    String dbURL = "jdbc:postgresql://localhost:9999/cse132?user=postgres&password=admin";
                     Connection conn = DriverManager.getConnection(dbURL);
 
             %>
@@ -33,13 +33,13 @@
                     // Use the created statement to SELECT
                     // the student attributes FROM the Student table.
                     ResultSet rs = statement.executeQuery
-                        ("SELECT Distinct s.* FROM student s, enrolled_list e where s.id = e.pid");
+                        ("SELECT Distinct s.* FROM student s, enrolled_list e where s.id = e.pid ORDER BY s.id");
 
             %>
 
             <!-- Add an HTML table header row to format the results -->
                 <table border="1">
-                    
+
 
                     <tr>
                         <th>Student</th>
@@ -49,7 +49,7 @@
                     <tr>
                         <form action="report1c.jsp" method="get">
                             <input type="hidden" value="Select_Student" name="action">
-                            
+
                             <th><select name="ID">
                                 <%  while(rs.next()){ %>
                                 <option value="<%= rs.getString(1)%>" > <%= rs.getString(1) + ", " + rs.getString(3) + ", " + rs.getString(4) + ", " + rs.getString(5) %></option>
@@ -70,7 +70,7 @@
                         <th>Units</th>
                         <th>Grade Received</th>
                     </tr>
-                    
+
 
             <%-- -------- Iteration Code -------- --%>
             <%
@@ -83,17 +83,17 @@
                     rs2 = statement.executeQuery("SELECT * FROM course ");
                     rs3 = statement2.executeQuery("SELECT * FROM course ");
                     rs4 = statement3.executeQuery("SELECT * FROM course ");
-                    
+
 
                     if (request.getParameter("ID") != null){
-                   
+
                     rs2 = statement.executeQuery
-                        ("SELECT c.course_id, c.course_name, c.current_taught, c.next_quarter, c.next_year, e.class_id, e.quarter, e.year, e.unit, e.grade_received, o.offered_quarter, o.offered_year FROM course c INNER JOIN quarter_offered o ON c.course_id = o.course_id INNER JOIN (SELECT * FROM enrolled_list ORDER BY quarter, year) e ON o.course_id = e.course_id WHERE pid = '" + request.getParameter("ID") + "'" );
-                
-                    
+                        ("SELECT c.course_id, c.course_name, c.current_taught, c.next_quarter, c.next_year, e.class_id, e.quarter, e.year, e.unit, e.grade_received, o.offered_quarter FROM course c INNER JOIN quarter_offered o ON c.course_id = o.course_id INNER JOIN (SELECT * FROM enrolled_list ORDER BY quarter, year) e ON o.course_id = e.course_id WHERE pid = '" + request.getParameter("ID") + "'" );
+
+
 
                     while ( rs2.next() ) {
-        
+
             %>
 
                     <tr>
@@ -110,13 +110,13 @@
                             <td>
                                 <%= rs2.getString("COURSE_NAME") %>
                             </td>
-    
-    
+
+
                             <%-- Get the QUARTER_OFFERED --%>
                             <td>
-                                <%= rs2.getString("OFFERED_QUARTER") + " " + rs2.getString("OFFERED_YEAR") %>
+                                <%= rs2.getString("OFFERED_QUARTER") %>
                             </td>
-    
+
                             <%-- Get the CURRENTLY_TAUGHT --%>
                             <td>
                                 <%= rs2.getString("CURRENT_TAUGHT") %>
@@ -176,21 +176,21 @@
                         </td>
                         </form>
                         </tr>
-                    
+
             <%
                 }
             %>
             </tr>
             <tr>
-                <th>OVERALL GPA</th>         
+                <th>OVERALL GPA</th>
             </tr>
             <%
                             while ( rs4.next() ) {
             %>
             <tr>
             <form action="report1c.jsp" method="post">
-                <td><%= rs4.getString("OVERALLGPA") %></td>   
-            </form>      
+                <td><%= rs4.getString("OVERALLGPA") %></td>
+            </form>
             </tr>
             <%
                 }
@@ -204,7 +204,7 @@
                     rs2.close();
                     rs3.close();
                     rs4.close();
-    
+
                     // Close the Statement
                     statement.close();
                     statement2.close();
