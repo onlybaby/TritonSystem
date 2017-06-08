@@ -1,0 +1,128 @@
+
+CREATE FUNCTION check_limit() RETURNS trigger AS $check_limit$
+DECLARE
+  limit_ int8;
+BEGIN
+  limit_ = (SELECT class.ENROLLMENT_LIMIT from class where class.CLASS_ID = NEW.CLASS_ID);
+  IF (TG_OP = 'Insert') THEN
+    IF EXISTS(
+      SELECT * FROM enroll_current WHERE enroll_current.CLASS_ID = NEW.CLASS_ID
+    )
+    THEN
+      IF (SELECT COUNT(*) FROM enroll WHERE enroll_current.CLASS_ID = NEW.CLASS_ID) >= limit_
+      THEN RAISE EXCEPTION 'the class limit exceeded!';
+      END IF;
+    END IF;
+  ELSE
+    IF limit_ <= (SELECT COUNT(*) FROM enroll_current WHERE enroll_current.CLASS_ID = NEW.CLASS_ID)
+    THEN RAISE EXCEPTION 'the class limit exceeded!';
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$check_limit$ LANGUAGE plpgsql;
+
+CREATE TRIGGER check_limit BEFORE INSERT OR UPDATE ON enroll_current
+    FOR EACH ROW EXECUTE PROCEDURE check_limit();
+DROP trigger check_limit on enroll_current;
+DROP FUNCTION check_limit();
+
+CREATE TABLE CPQG AS (
+  WITH newEnroll AS (SELECT c.COURSE_ID, c.INSTRUCTOR, c.QUARTER, c.YEAR, case when (e.GRADE_RECEIVED = 'A' or
+  e.GRADE_RECEIVED = 'A+' or e.GRADE_RECEIVED = 'A-') then 'A' when e.GRADE_RECEIVED = 'B' or
+  e.GRADE_RECEIVED = 'B+' or e.GRADE_RECEIVED = 'B-' then 'B' when e.GRADE_RECEIVED = 'C' or
+  e.GRADE_RECEIVED = 'C+' or e.GRADE_RECEIVED = 'C-' then 'C' when e.GRADE_RECEIVED = 'D' then 'D'
+  ELSE 'OTHER' END AS GRADE FROM class c
+  INNER JOIN enrolled_list e ON c.CLASS_ID = e.CLASS_ID)
+  SELECT COURSE_ID, INSTRUCTOR, QUARTER, YEAR, GRADE, COUNT(GRADE) AS COUNT_OF_GRADE
+  FROM newEnroll
+  GROUP BY COURSE_ID, INSTRUCTOR, QUARTER, YEAR, GRADE
+);
+
+CREATE TABLE CPG AS (
+  WITH newEnroll AS (SELECT c.COURSE_ID, c.INSTRUCTOR, case when (e.GRADE_RECEIVED = 'A' or
+  e.GRADE_RECEIVED = 'A+' or e.GRADE_RECEIVED = 'A-') then 'A' when e.GRADE_RECEIVED = 'B' or
+  e.GRADE_RECEIVED = 'B+' or e.GRADE_RECEIVED = 'B-' then 'B' when e.GRADE_RECEIVED = 'C' or
+  e.GRADE_RECEIVED = 'C+' or e.GRADE_RECEIVED = 'C-' then 'C' when e.GRADE_RECEIVED = 'D' then 'D'
+  ELSE 'OTHER' END AS GRADE FROM class c
+  INNER JOIN enrolled_list e ON c.CLASS_ID = e.CLASS_ID)
+  SELECT COURSE_ID, INSTRUCTOR, GRADE, COUNT(GRADE) AS COUNT_OF_GRADE
+  FROM newEnroll
+  GROUP BY COURSE_ID, INSTRUCTOR, GRADE
+)
+DROP TABLE CPG;
+
+CREATE FUNCTION check_update() RETURNS trigger AS $check_update$
+DECLARE
+  conversion_grade_ varchar = '';
+  old_grade_ varchar = '';
+BEGIN
+  IF (TG_OP = 'INSERT') THEN
+    IF NEW.GRADE_RECEIVED = 'A' or NEW.GRADE_RECEIVED = 'A-' or NEW.GRADE_RECEIVED = 'A+' THEN conversion_grade_ = 'A';
+    ELSEIF NEW.GRADE_RECEIVED = 'B' or NEW.GRADE_RECEIVED = 'B-' or NEW.GRADE_RECEIVED = 'B+' THEN conversion_grade_ = 'B';
+    ELSEIF NEW.GRADE_RECEIVED = 'C' or NEW.GRADE_RECEIVED = 'C-' or NEW.GRADE_RECEIVED = 'C+' THEN conversion_grade_ = 'C';
+    ELSEIF NEW.GRADE_RECEIVED = 'D' THEN conversion_grade_ = 'D';
+    ELSE conversion_grade_ = 'OTHER';
+    END IF;
+    IF NEW.GRADE_RECEIVED = 'B' THEN RAISE EXCEPTION 'HERE!';
+    END IF;
+    UPDATE CPQG SET COUNT_OF_GRADE = COUNT_OF_GRADE + 1
+    WHERE COURSE_ID IN (SELECT e.COURSE_ID FROM enrolled_list e where NEW.CLASS_ID = e.CLASS_ID) AND INSTRUCTOR IN (SELECT class.INSTRUCTOR FROM class WHERE class.CLASS_ID = NEW.CLASS_ID)
+    AND QUARTER = (SELECT e.QUARTER FROM enrolled_list e where NEW.CLASS_ID = e.CLASS_ID) AND YEAR = (SELECT e.YEAR FROM enrolled_list e where NEW.CLASS_ID = e.CLASS_ID) AND GRADE = conversion_grade_;
+    UPDATE CPG
+    SET COUNT_OF_GRADE = COUNT_OF_GRADE + 1
+    WHERE CPG.COURSE_ID = NEW.COURSE_ID AND CPG.INSTRUCTOR IN (SELECT class.INSTRUCTOR FROM class WHERE class.CLASS_ID = NEW.CLASS_ID)
+    AND CPG.GRADE = conversion_grade_;
+  ELSEIF (TG_OP = 'Delete') THEN
+    IF OLD.GRADE_RECEIVED = 'A' or OLD.GRADE_RECEIVED = 'A-' or OLD.GRADE_RECEIVED = 'A+' THEN old_grade_ = 'A';
+    ELSEIF OLD.GRADE_RECEIVED = 'B' or OLD.GRADE_RECEIVED = 'B-' or OLD.GRADE_RECEIVED = 'B+' THEN old_grade_ = 'B';
+    ELSEIF OLD.GRADE_RECEIVED = 'C' or OLD.GRADE_RECEIVED = 'C-' or OLD.GRADE_RECEIVED = 'C+' THEN old_grade_ = 'C';
+    ELSEIF OLD.GRADE_RECEIVED = 'D' THEN old_grade_ = 'D';
+    ELSE old_grade_ = 'OTHER';
+    END IF;
+    UPDATE CPQG
+    SET COUNT_OF_GRADE = COUNT_OF_GRADE - 1
+    WHERE CPQG.COURSE_ID = OLD.COURSE_ID AND CPQG.INSTRUCTOR IN (SELECT class.INSTRUCTOR FROM class WHERE class.CLASS_ID = OLD.CLASS_ID)
+    AND CPQG.QUARTER = OLD.QUARTER AND CPQG.YEAR = OLD.YEAR AND CPQG.GRADE = old_grade_;
+    UPDATE CPG
+    SET COUNT_OF_GRADE = COUNT_OF_GRADE - 1
+    WHERE CPG.COURSE_ID = OLD.COURSE_ID AND CPG.INSTRUCTOR IN (SELECT class.INSTRUCTOR FROM class WHERE class.CLASS_ID = OLD.CLASS_ID)
+    AND CPG.GRADE = old_grade_;
+  ELSEIF (TG_OP = 'Update') THEN
+    IF NEW.GRADE_RECEIVED = 'A' or NEW.GRADE_RECEIVED = 'A-' or NEW.GRADE_RECEIVED = 'A+' THEN conversion_grade_ = 'A';
+    ELSEIF NEW.GRADE_RECEIVED = 'B' or NEW.GRADE_RECEIVED = 'B-' or NEW.GRADE_RECEIVED = 'B+' THEN conversion_grade_ = 'B';
+    ELSEIF NEW.GRADE_RECEIVED = 'C' or NEW.GRADE_RECEIVED = 'C-' or NEW.GRADE_RECEIVED = 'C+' THEN conversion_grade_ = 'C';
+    ELSEIF NEW.GRADE_RECEIVED = 'D' THEN conversion_grade_ = 'D';
+    ELSE conversion_grade_ = 'OTHER';
+    END IF;
+    IF OLD.GRADE_RECEIVED = 'A' or OLD.GRADE_RECEIVED = 'A-' or OLD.GRADE_RECEIVED = 'A+' THEN old_grade_ = 'A';
+    ELSEIF OLD.GRADE_RECEIVED = 'B' or OLD.GRADE_RECEIVED = 'B-' or OLD.GRADE_RECEIVED = 'B+' THEN old_grade_ = 'B';
+    ELSEIF OLD.GRADE_RECEIVED = 'C' or OLD.GRADE_RECEIVED = 'C-' or OLD.GRADE_RECEIVED = 'C+' THEN old_grade_ = 'C';
+    ELSEIF OLD.GRADE_RECEIVED = 'D' THEN old_grade_ = 'D';
+    ELSE old_grade_ = 'OTHER';
+    END IF;
+    UPDATE CPQG
+    SET COUNT_OF_GRADE = COUNT_OF_GRADE + 1
+    WHERE CPQG.COURSE_ID = NEW.COURSE_ID AND CPQG.INSTRUCTOR IN (SELECT class.INSTRUCTOR FROM class WHERE class.CLASS_ID = NEW.CLASS_ID)
+    AND CPQG.QUARTER = NEW.QUARTER AND CPQG.YEAR = NEW.YEAR AND CPQG.GRADE = conversion_grade_;
+    UPDATE CPQG
+    SET COUNT_OF_GRADE = COUNT_OF_GRADE - 1
+    WHERE CPQG.COURSE_ID = OLD.COURSE_ID AND CPQG.INSTRUCTOR IN (SELECT class.INSTRUCTOR FROM class WHERE class.CLASS_ID = OLD.CLASS_ID)
+    AND CPQG.QUARTER = OLD.QUARTER AND CPQG.YEAR = OLD.YEAR AND CPQG.GRADE = old_grade_;
+    UPDATE CPG
+    SET COUNT_OF_GRADE = COUNT_OF_GRADE + 1
+    WHERE CPG.COURSE_ID = NEW.COURSE_ID AND CPG.INSTRUCTOR IN (SELECT class.INSTRUCTOR FROM class WHERE class.CLASS_ID = NEW.CLASS_ID)
+    AND CPG.GRADE = conversion_grade_;
+    UPDATE CPG
+    SET COUNT_OF_GRADE = COUNT_OF_GRADE - 1
+    WHERE CPG.COURSE_ID = OLD.COURSE_ID AND CPG.INSTRUCTOR IN (SELECT class.INSTRUCTOR FROM class WHERE class.CLASS_ID = OLD.CLASS_ID)
+    AND CPQG.GRADE = old_grade_;
+  END IF;
+  RETURN NEW;
+END;
+$check_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER check_update AFTER INSERT OR UPDATE OR DELETE ON enrolled_list
+    FOR EACH ROW EXECUTE PROCEDURE check_update();
+DROP trigger check_update on enrolled_list;
+DROP FUNCTION check_update();
