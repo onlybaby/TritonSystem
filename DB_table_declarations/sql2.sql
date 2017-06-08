@@ -268,12 +268,15 @@ CREATE TABLE REVIEW_SESSIONS(
 
 -- 1.
 
+DROP TRIGGER IF EXISTS LE_DI_LAB ON weekly_meetings;
+DROP FUNCTION IF EXISTS LE_DI_LAB();
+
 CREATE FUNCTION LE_DI_LAB() RETURNS trigger AS $LE_DI_LAB$
   BEGIN
     IF EXISTS(
       SELECT *
       FROM weekly_meetings w
-      WHERE w.class_id = NEW.class_id AND((NEW.day_weekly = w.day_weekly AND NEW.start_weekly > w.start_weekly AND NEW.start_weekly < w.end_weekly) OR (NEW.day_weekly = w.day_weekly AND NEW.end_weekly > w.start_weekly AND NEW.end_weekly < w.end_weekly) OR (NEW.day_weekly = w.day_weekly AND NEW.start_weekly = w.start_weekly AND NEW.end_weekly = w.end_weekly))
+      WHERE w.class_id = NEW.class_id AND NEW.day_weekly = w.day_weekly AND((NEW.start_weekly > w.start_weekly AND NEW.start_weekly < w.end_weekly) OR (NEW.end_weekly > w.start_weekly AND NEW.end_weekly < w.end_weekly) OR (NEW.start_weekly = w.start_weekly AND NEW.end_weekly = w.end_weekly))
     )
     THEN RAISE EXCEPTION 'TIME CONFLICT';
     END IF;
@@ -285,10 +288,10 @@ CREATE TRIGGER LE_DI_LAB BEFORE INSERT OR UPDATE ON weekly_meetings
   FOR EACH ROW EXECUTE PROCEDURE LE_DI_LAB();
 
 
---DROP FUNCTION LE_DI_LAB();
---DROP TRIGGER LE_DI_LAB ON weekly_meetings;
-
 -- 3.
+
+DROP TRIGGER IF EXISTS prof_time_conflict ON weekly_meetings;
+DROP FUNCTION IF EXISTS prof_time_conflict();
 
 CREATE FUNCTION prof_time_conflict() RETURNS trigger AS $prof_time_conflict$
   BEGIN
@@ -305,11 +308,6 @@ CREATE FUNCTION prof_time_conflict() RETURNS trigger AS $prof_time_conflict$
 
 CREATE TRIGGER prof_time_conflict BEFORE INSERT OR UPDATE ON weekly_meetings
   FOR EACH ROW EXECUTE PROCEDURE prof_time_conflict();
-
-
---DROP FUNCTION prof_time_conflict();
---DROP TRIGGER prof_time_conflict ON weekly_meetings;
-
 
 create table GRADE_CONVERSION
 ( LETTER_GRADE CHAR(2) NOT NULL,
